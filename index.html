@@ -2,10 +2,81 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>My Website</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>USMA Day Counter</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f9; color: #222; text-align: center; padding: 2rem; }
+    h1 { color: #800000; } /* West Point maroon */
+    .event { margin: 1rem 0; padding: 1rem; border-radius: 10px; background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+  </style>
 </head>
 <body>
-  <h1>Hello, welcome to my website</h1>
-  <p>test</p>
+  <h1>USMA Day Counter</h1>
+  <p id="today"></p>
+  <div class="event" id="ring"></div>
+  <div class="event" id="football"></div>
+  <div class="event" id="thanksgiving"></div>
+  <div class="event" id="navy"></div>
+  <div class="event" id="christmas"></div>
+  <div class="event" id="grad"></div>
+
+  <script>
+    function daysUntil(date) {
+      const today = new Date(), oneDay = 1000*60*60*24;
+      return Math.floor((date - today) / oneDay);
+    }
+
+    function getNextGame() {
+      const today = new Date();
+      const schedule = [
+        { date: '2025-08-29', opponent: 'Tarleton State' },
+        { date: '2025-09-06', opponent: 'Kansas State' },
+        { date: '2025-09-20', opponent: 'North Texas' },
+        { date: '2025-09-25', opponent: 'East Carolina' },
+        { date: '2025-10-04', opponent: 'UAB' },
+        { date: '2025-10-11', opponent: 'Charlotte' },
+        { date: '2025-10-18', opponent: 'Tulane' },
+        { date: '2025-11-01', opponent: 'Air Force' },
+        { date: '2025-11-08', opponent: 'Temple' },
+        { date: '2025-11-22', opponent: 'Tulsa' },
+        { date: '2025-11-28', opponent: 'UTSA' },
+        { date: '2025-12-13', opponent: 'Navy' }
+      ].map(g => ({ date: new Date(g.date), opponent: g.opponent }));
+
+      for (let game of schedule) {
+        const offset = daysUntil(game.date);
+        if (offset >= 0) return game;
+      }
+      // Season over: show next Saturday
+      const nextSat = new Date(today);
+      const dow = today.getDay(), shift = dow === 6 ? 7 : dow === 0 ? 6 : (6 - dow);
+      nextSat.setDate(today.getDate() + shift);
+      nextSat.setHours(0,0,0,0);
+      return { date: nextSat, opponent: 'opponent for this week' };
+    }
+
+    function updateCounters() {
+      const today = new Date();
+      document.getElementById('today').innerText = `Today is ${today.toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'})}!`;
+
+      const ring = new Date('2025-08-22');
+      const thanksgiving = new Date('2025-11-27');
+      const armyNavy = new Date('2025-12-13');
+      const christmas = new Date('2025-12-20');
+      const graduation = new Date('2026-05-23');
+
+      const nextGame = getNextGame();
+
+      document.getElementById('ring').innerText = `There are ${daysUntil(ring)} and a butt days until Ring Weekend!`;
+      document.getElementById('football').innerText = `There are ${daysUntil(nextGame.date)} and a butt days until Army plays ${nextGame.opponent}!`;
+      document.getElementById('thanksgiving').innerText = `There are ${daysUntil(thanksgiving)} and a butt days until Thanksgiving Break!`;
+      document.getElementById('navy').innerText = `There are ${daysUntil(armyNavy)} and a butt days until Army beats Navy in Football!`;
+      document.getElementById('christmas').innerText = `There are ${daysUntil(christmas)} and a butt days until Christmas leave!`;
+      document.getElementById('grad').innerText = `There are ${daysUntil(graduation)} and a butt days until graduation and graduation leave for the class of 2026!`;
+    }
+
+    updateCounters();
+    setInterval(updateCounters, 1000 * 60 * 60);
+  </script>
 </body>
 </html>
