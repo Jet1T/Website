@@ -67,12 +67,12 @@
 
       const nextGame = getNextGame();
 
-      document.getElementById('ring').innerText = `There are ${daysUntil(ring)} and a butt days until Ring Weekend!`;
-      document.getElementById('football').innerText = `There are ${daysUntil(nextGame.date)} and a butt days until Army beats ${nextGame.opponent} in football!`;
-      document.getElementById('thanksgiving').innerText = `There are ${daysUntil(thanksgiving)} and a butt days until Thanksgiving Break!`;
-      document.getElementById('navy').innerText = `There are ${daysUntil(armyNavy)} and a butt days until Army beats Navy in Football!`;
-      document.getElementById('christmas').innerText = `There are ${daysUntil(christmas)} and a butt days until Christmas leave!`;
-      document.getElementById('grad').innerText = `There are ${daysUntil(graduation)} and a butt days until graduation and graduation leave for the class of 2026!`;
+      document.getElementById('ring').innerText = `There are ${daysUntil(ring) + 1} and a butt days until Ring Weekend!`;
+      document.getElementById('football').innerText = `There are ${daysUntil(nextGame.date) + 1} and a butt days until Army beats ${nextGame.opponent} in football!`;
+      document.getElementById('thanksgiving').innerText = `There are ${daysUntil(thanksgiving) + 1} and a butt days until Thanksgiving Break!`;
+      document.getElementById('navy').innerText = `There are ${daysUntil(armyNavy) + 1} and a butt days until Army beats Navy in Football!`;
+      document.getElementById('christmas').innerText = `There are ${daysUntil(christmas) + 1} and a butt days until Christmas leave!`;
+      document.getElementById('grad').innerText = `There are ${daysUntil(graduation) + 1} and a butt days until graduation and graduation leave for the class of 2026!`;
     }
 
     updateCounters();
