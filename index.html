@@ -120,14 +120,18 @@
     </header>
 
     <section class="grid">
-      <!-- Removed Ring Weekend -->
+      <!-- Existing cards -->
       <div class="event" id="football"><span class="label">Next Army Game</span><div class="value"></div></div>
       <div class="event" id="thanksgiving"><span class="label">Thanksgiving Break</span><div class="value"></div></div>
       <div class="event" id="navy"><span class="label">Army–Navy</span><div class="value"></div></div>
       <div class="event" id="christmas"><span class="label">Christmas Leave</span><div class="value"></div></div>
       <div class="event" id="night500"><span class="label">500th Night</span><div class="value"></div></div>
       <div class="event" id="yww"><span class="label">Yearling Winter Weekend</span><div class="value"></div></div>
+	  <div class="event" id="levindoski"><span class="label">Birthday</span><div class="value"></div></div>
       <div class="event" id="grad"><span class="label">Graduation (’26)</span><div class="value"></div></div>
+
+      <!-- NEW: SGT Levindoski's Birthday -->
+      
     </section>
 
     <p class="footer">👾Contact jet.kennedy@westpoint.edu for any bugs👾</p>
@@ -151,6 +155,15 @@
       const t = startOfDay(target);
       const today = startOfDay();
       return Math.max(0, Math.ceil((t - today) / ONE_DAY));
+    }
+
+    // Helper: next occurrence of a month/day (e.g., 5/18) from today
+    function nextAnnualDate(month /*1-12*/, day /*1-31*/) {
+      const today = startOfDay();
+      const year = today.getFullYear();
+      const thisYear = new Date(year, month - 1, day);
+      if (thisYear >= today) return thisYear;
+      return new Date(year + 1, month - 1, day);
     }
 
     function getNextGame() {
@@ -199,6 +212,7 @@
       const yww          = localDate('2026-01-24');
       const graduation   = localDate('2026-05-23');
       const nextGame     = getNextGame();
+      const levBirthday  = nextAnnualDate(5, 18); // May 18 (next occurrence)
 
       const setText = (id, text) => {
         const el = document.getElementById(id);
@@ -214,6 +228,9 @@
       setText('night500',     `There are ${daysUntilInclusive(night500)} and a butt days until 500th Night!`);
       setText('yww',          `There are ${daysUntilInclusive(yww) - 2} and a butt days until Yearling Winter Weekend!`);
       setText('grad',         `There are ${daysUntilInclusive(graduation) - 2} and a butt days until graduation and graduation leave for the class of 2026!`);
+
+      // NEW: Levindoski birthday card text
+      setText('levindoski',   `There are ${daysUntilInclusive(levBirthday)} and a butt days until SGT Levindoski's Birthday!`);
     }
 
     // Run once now, then flip at local midnight, then every 24h
