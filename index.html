@@ -112,8 +112,7 @@
     </header>
 
     <section class="grid">
-      <div class="event" id="football"><span class="label">Next Army Game</span><div class="value"></div></div>
-      <div class="event" id="thanksgiving"><span class="label">Thanksgiving Break</span><div class="value"></div></div>
+      <!-- Removed "football" and "thanksgiving" cards -->
       <div class="event" id="navy"><span class="label">Army–Navy</span><div class="value"></div></div>
       <div class="event" id="decgrad"><span class="label">December Graduation</span><div class="value"></div></div>
       <div class="event" id="christmas"><span class="label">Christmas Leave</span><div class="value"></div></div>
@@ -129,8 +128,17 @@
     const ONE_DAY = 1000*60*60*24;
     function localDate(iso){const [y,m,d]=iso.split('-').map(Number);return new Date(y,m-1,d);}
     function startOfDay(d=new Date()){const x=new Date(d);x.setHours(0,0,0,0);return x;}
-    function daysUntilInclusive(target){const t=startOfDay(target);const today=startOfDay();return Math.max(0,Math.ceil((t-today)/ONE_DAY));}
-    function nextAnnualDate(month,day){const today=startOfDay();const y=today.getFullYear();const thisYear=new Date(y,month-1,day);return thisYear>=today?thisYear:new Date(y+1,month-1,day);}
+    function daysUntilInclusive(target){
+      const t=startOfDay(target);
+      const today=startOfDay();
+      return Math.max(0,Math.ceil((t-today)/ONE_DAY));
+    }
+    function nextAnnualDate(month,day){
+      const today=startOfDay();
+      const y=today.getFullYear();
+      const thisYear=new Date(y,month-1,day);
+      return thisYear>=today?thisYear:new Date(y+1,month-1,day);
+    }
     function getNextGame(){
       const schedule=[
         {date:'2025-08-29',opponent:'Tarleton State'},
@@ -146,8 +154,17 @@
         {date:'2025-11-28',opponent:'UTSA'},
         {date:'2025-12-13',opponent:'Navy'}
       ].map(g=>({date:localDate(g.date),opponent:g.opponent}));
-      for(const g of schedule){const d=daysUntilInclusive(g.date);if(d>0)return g;if(startOfDay(g.date).getTime()===startOfDay().getTime())return g;}
-      const today=new Date();const nextSat=startOfDay(new Date(today));const dow=today.getDay();const shift=(6-dow+7)%7||7;nextSat.setDate(nextSat.getDate()+shift);return{date:nextSat,opponent:'opponent for this week'};
+      for(const g of schedule){
+        const d=daysUntilInclusive(g.date);
+        if(d>0)return g;
+        if(startOfDay(g.date).getTime()===startOfDay().getTime())return g;
+      }
+      const today=new Date();
+      const nextSat=startOfDay(new Date(today));
+      const dow=today.getDay();
+      const shift=(6-dow+7)%7||7;
+      nextSat.setDate(nextSat.getDate()+shift);
+      return{date:nextSat,opponent:'opponent for this week'};
     }
 
     function updateCounters(){
@@ -155,14 +172,12 @@
       const todayEl=document.getElementById('today');
       if(todayEl)todayEl.innerText=`Today is ${now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}!`;
 
-      const thanksgiving=localDate('2025-11-27');
       const armyNavy=localDate('2025-12-13');
       const decGrad=localDate('2025-12-19');
       const christmas=localDate('2025-12-20');
       const night500=localDate('2026-01-09');
       const yww=localDate('2026-01-24');
       const graduation=localDate('2026-05-23');
-      const nextGame=getNextGame();
 
       const setText=(id,text)=>{
         const el=document.getElementById(id);
@@ -171,9 +186,19 @@
         if(v)v.innerText=text;
       };
 
-      setText('football',`There are ${daysUntilInclusive(nextGame.date)} and a butt days until Army beats ${nextGame.opponent} in football!`);
-      setText('thanksgiving',`There are ${daysUntilInclusive(thanksgiving)} and a butt days until Thanksgiving Break!`);
-      setText('navy',`There are ${daysUntilInclusive(armyNavy)} and a butt days until Army beats the hell out of Navy in Football!`);
+      // Army–Navy tile: hide starting the day after the game
+      const navyEl = document.getElementById('navy');
+      if (navyEl) {
+        const dayAfterArmyNavy = new Date(armyNavy);
+        dayAfterArmyNavy.setDate(dayAfterArmyNavy.getDate() + 1);
+        const todayStart = startOfDay();
+        if (todayStart >= dayAfterArmyNavy) {
+          navyEl.style.display = 'none';
+        } else {
+          setText('navy',`There are ${daysUntilInclusive(armyNavy)} and a butt days until Army beats the hell out of Navy in Football!`);
+        }
+      }
+
       setText('decgrad',`There are ${daysUntilInclusive(decGrad)} and a butt days until December Graduation!`);
       setText('christmas',`There are ${daysUntilInclusive(christmas)} and a butt days until Christmas leave!`);
       setText('night500',`There are ${daysUntilInclusive(night500)} and a butt days until 500th Night!`);
