@@ -94,6 +94,80 @@
     .footer{
       margin-top:22px;text-align:center;color:var(--muted);font-size:.9rem;
     }
+
+        /* Class of '29 Progress Bar */
+    .class-progress-card{
+      margin-top:24px;
+      padding:18px 20px 22px;
+      border-radius:var(--radius);
+      background:var(--panel);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      font-size:.9rem;
+    }
+    .class-progress-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .class-progress-title{
+      font-variant:small-caps;
+      letter-spacing:.07em;
+      color:var(--muted);
+    }
+    .class-progress-percent{
+      font-weight:bold;
+      color:var(--text);
+      font-size:.95rem;
+    }
+    .progress-track{
+      position:relative;
+      margin-top:12px;
+      height:14px;
+      border-radius:999px;
+      background:#eee;
+      overflow:hidden;
+    }
+    .progress-fill{
+      position:absolute;
+      inset:0 auto 0 0;
+      width:0%;
+      background:linear-gradient(90deg,var(--gold),var(--gold-soft));
+      border-radius:999px;
+      transition:width .8s ease-out;
+    }
+    .marker{
+      position:absolute;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:12px;
+      height:12px;
+      border-radius:999px;
+      background:var(--bg);
+      border:2px solid var(--gold);
+      box-shadow:0 0 0 2px rgba(0,0,0,.05);
+      z-index:2;
+    }
+    .marker.past{
+      background:var(--gold-soft);
+      opacity:.95;
+    }
+    .marker-label{
+      position:absolute;
+      top:20px;
+      transform:translateX(-50%);
+      font-size:.7rem;
+      white-space:nowrap;
+      color:var(--muted);
+    }
+    .class-progress-note{
+      margin-top:8px;
+      font-size:.8rem;
+      color:var(--muted);
+    }
+
   </style>
 </head>
 <body>
@@ -122,6 +196,21 @@
     </section>
 
     <p class="footer">👾Contact jet.kennedy@westpoint.edu for any bugs👾</p>
+
+    <!-- Class of 2029 Journey Progress -->
+    <section class="class-progress-card" id="class29-progress">
+      <div class="class-progress-header">
+        <div class="class-progress-title">Class of 2029 • 47-Month Journey</div>
+        <div class="class-progress-percent" id="class29-percent"></div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill"></div>
+        <!-- Markers will be injected here by JavaScript -->
+      </div>
+      <p class="class-progress-note">
+        
+      </p>
+    </section>
   </main>
 
   <script>
@@ -167,6 +256,56 @@
       return{date:nextSat,opponent:'opponent for this week'};
     }
 
+        function updateClassProgress(){
+      // === CONFIG: update these dates as needed ===
+      const journeyStart = localDate('2025-06-30'); // R-Day ’29 (approx)
+      const journeyEnd   = localDate('2029-05-26'); // Grad ’29 (approx)
+
+      const today = startOfDay();
+      const totalMs = journeyEnd - journeyStart;
+      let elapsedMs = today - journeyStart;
+
+      if (elapsedMs < 0) elapsedMs = 0;
+      if (elapsedMs > totalMs) elapsedMs = totalMs;
+
+      const pct = totalMs > 0 ? (elapsedMs / totalMs) * 100 : 0;
+
+      const fillEl = document.querySelector('.progress-fill');
+      const pctEl  = document.getElementById('class29-percent');
+      if (fillEl) fillEl.style.width = pct.toFixed(2) + '%';
+      if (pctEl)  pctEl.textContent = pct.toFixed(1) + '% complete';
+
+      const track = document.querySelector('.progress-track');
+      if (!track || totalMs <= 0) return;
+
+      // Clear any existing markers so we can redraw each day
+      track.querySelectorAll('.marker').forEach(m => m.remove());
+
+      // Major milestones for Class of ’29
+      // ⚠️ Feel free to tweak these dates to match the real calendar
+      const milestones = [
+        { label: 'R-Day',            date: localDate('2025-06-30') },
+        { label: 'Grad ’29',        date: journeyEnd }
+      ];
+
+      milestones.forEach(ms => {
+        const offset = ms.date - journeyStart;
+        const pos = (offset / totalMs) * 100;
+        if (pos < 0 || pos > 100) return; // skip out-of-range
+
+        const marker = document.createElement('div');
+        marker.className = 'marker' + (ms.date <= today ? ' past' : '');
+        marker.style.left = pos + '%';
+
+        const label = document.createElement('div');
+        label.className = 'marker-label';
+        label.textContent = ms.label;
+
+        marker.appendChild(label);
+        track.appendChild(marker);
+      });
+    }
+    
     function updateCounters(){
       const now=new Date();
       const todayEl=document.getElementById('today');
@@ -204,6 +343,10 @@
       setText('night500',`There are ${daysUntilInclusive(night500)} and a butt days until 500th Night!`);
       setText('yww',`There are ${daysUntilInclusive(yww)} and a butt days until Yearling Winter Weekend!`);
       setText('grad',`There are ${daysUntilInclusive(graduation)} and a butt days until graduation and graduation leave for the class of 2026!`);
+
+            // Update Class of 2029 journey progress bar
+      updateClassProgress();
+
     }
 
     updateCounters();
