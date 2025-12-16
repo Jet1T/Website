@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>The Days — Day Grid</title>
+  <style>
+    :root{
+      --bg:#0b0f17;
+      --panel:#111827;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --accent:#60a5fa;
+      --done:#22c55e;
+      --border:rgba(255,255,255,.08);
+      --shadow:0 12px 40px rgba(0,0,0,.35);
+      --square:14px;     /* base square size */
+      --gap:6px;         /* base gap */
+      --radius:5px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(96,165,250,.15), transparent 60%),
+                  radial-gradient(900px 500px at 90% 10%, rgba(34,197,94,.12), transparent 65%),
+                  var(--bg);
+      color:var(--text);
+    }
+
+    header{
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      background: rgba(11,15,23,.75);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .wrap{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px 16px;
+    }
+
+    .topRow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    h1{
+      margin:0;
+      font-size: 18px;
+      letter-spacing:.2px;
+      font-weight: 700;
+    }
+    .sub{
+      margin-top:6px;
+      color:var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .quote{
+      margin-top:10px;
+      padding: 10px 12px;
+      background: rgba(17,24,39,.65);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      max-width: 780px;
+    }
+    .quote strong{
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .btns{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    button, a.btn{
+      appearance:none;
+      border:1px solid var(--border);
+      background: rgba(17,24,39,.8);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      text-decoration:none;
+      font-size: 13px;
+      line-height: 1;
+      transition: transform .06s ease, border-color .15s ease, background .15s ease;
+      user-select:none;
+    }
+    button:hover, a.btn:hover{ border-color: rgba(96,165,250,.35); background: rgba(17,24,39,.95); }
+    button:active, a.btn:active{ transform: translateY(1px); }
+
+    main .wrap{
+      padding-top: 16px;
+      padding-bottom: 26px;
+    }
+
+    .panel{
+      background: rgba(17,24,39,.55);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .metaRow{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .legend{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .dot{
+      width: 12px; height: 12px;
+      border-radius: 4px;
+      display:inline-block;
+      border: 1px solid var(--border);
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    .dot.done{ background: rgba(34,197,94,.25); border-color: rgba(34,197,94,.5); }
+    .dot.left{ background: rgba(255,255,255,.06); }
+
+    /* GRID */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(calc(var(--square) + 2px), 1fr));
+      gap: var(--gap);
+      align-items: stretch;
+    }
+
+    .day{
+      position:relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      overflow:hidden;
+    }
+
+    .day.done{
+      background: rgba(34,197,94,.16);
+      border-color: rgba(34,197,94,.45);
+    }
+
+    /* The "X" */
+    .day.done::before,
+    .day.done::after{
+      content:"";
+      position:absolute;
+      inset: 18% 18%;
+      border-top: 2px solid rgba(34,197,94,.9);
+      transform-origin:center;
+    }
+    .day.done::before{ transform: rotate(45deg); }
+    .day.done::after{ transform: rotate(-45deg); }
+
+    /* Tooltip */
+    .day[data-tip]:hover::marker{ content:""; }
+    .day:hover{
+      outline: 2px solid rgba(96,165,250,.25);
+      outline-offset: 1px;
+    }
+    .tooltip{
+      position: fixed;
+      pointer-events:none;
+      padding: 7px 9px;
+      border-radius: 10px;
+      background: rgba(0,0,0,.75);
+      border: 1px solid rgba(255,255,255,.12);
+      color: var(--text);
+      font-size: 12px;
+      transform: translate(-50%, -120%);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity .08s ease;
+      z-index: 9999;
+    }
+
+    /* Smaller screens: make squares a bit bigger so it feels tappable */
+    @media (max-width: 560px){
+      :root{ --square: 16px; --gap: 7px; }
+      .wrap{ padding-left: 12px; padding-right: 12px; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="topRow">
+      <div>
+        <h1>Day Grid</h1>
+        <div class="sub" id="subtitle">Tracking your journey, one square at a time.</div>
+        <div class="quote" id="quoteBox"></div>
+      </div>
+      <div class="btns">
+        <a class="btn" href="./index.html">← Back</a>
+        <button id="jumpTodayBtn" type="button">Jump to today</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="panel">
+      <div class="metaRow">
+        <div id="stats">Loading…</div>
+        <div class="legend">
+          <span><span class="dot done"></span>Done</span>
+          <span><span class="dot left"></span>Left</span>
+        </div>
+      </div>
+
+      <div class="grid" id="grid"></div>
+    </div>
+  </div>
+</main>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+/**
+ * ✅ SET THESE TWO DATES FOR YOUR 47-MONTH JOURNEY
+ * Use YYYY-MM-DD (local time).
+ * Example placeholders below — swap to your real start/end.
+ */
+const START_DATE = "2025-06-30";  // <-- change me
+const END_DATE   = "2029-05-25";  // <-- change me
+
+// Quote options (you can add more)
+const QUOTES = [
+  "Days left to do something <strong>great</strong>.",
+  "Stack the days. The results take care of themselves.",
+  "One square at a time — discipline beats motivation.",
+  "Today’s square is small. The decision behind it isn’t.",
+  "Don’t count the days. Make the days count."
+];
+
+const gridEl = document.getElementById("grid");
+const statsEl = document.getElementById("stats");
+const subtitleEl = document.getElementById("subtitle");
+const quoteBox = document.getElementById("quoteBox");
+const tooltip = document.getElementById("tooltip");
+const jumpTodayBtn = document.getElementById("jumpTodayBtn");
+
+function toLocalMidnight(dateStr){
+  const [y,m,d] = dateStr.split("-").map(Number);
+  return new Date(y, m-1, d, 0, 0, 0, 0);
+}
+function fmtDate(d){
+  return d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
+}
+function daysBetweenInclusive(a, b){
+  const ms = 24 * 60 * 60 * 1000;
+  return Math.floor((b - a) / ms) + 1;
+}
+function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+function build(){
+  const start = toLocalMidnight(START_DATE);
+  const end   = toLocalMidnight(END_DATE);
+  const today = new Date();
+  const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0,0,0,0);
+
+  if (isNaN(start) || isNaN(end) || end < start){
+    statsEl.textContent = "Date range error — check START_DATE / END_DATE.";
+    subtitleEl.textContent = "Fix the date constants in grid.html.";
+    return;
+  }
+
+  const totalDays = daysBetweenInclusive(start, end);
+
+  // Completed days: from start up to today (inclusive), clamped to range
+  const completed = clamp(daysBetweenInclusive(start, todayMid), 0, totalDays);
+  const left = totalDays - completed;
+
+  // Stats + subtitle
+  statsEl.innerHTML = `
+    <strong>${left.toLocaleString()}</strong> days left ·
+    <strong>${completed.toLocaleString()}</strong> done ·
+    <strong>${totalDays.toLocaleString()}</strong> total
+  `;
+  subtitleEl.textContent = `${fmtDate(start)} → ${fmtDate(end)} (1 square = 1 day)`;
+
+  // Quote (rotate daily)
+  const quoteIndex = Math.abs(hashString(todayMid.toDateString())) % QUOTES.length;
+  quoteBox.innerHTML = `${QUOTES[quoteIndex]} <span style="color:var(--muted)">(${left.toLocaleString()} left)</span>`;
+
+  // Build grid
+  const frag = document.createDocumentFragment();
+
+  // Precompute today index so "Jump to today" works
+  const todayIndex = clamp(completed - 1, 0, totalDays - 1);
+
+  for (let i = 0; i < totalDays; i++){
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+
+    const cell = document.createElement("div");
+    cell.className = "day" + (i < completed ? " done" : "");
+    cell.dataset.index = i;
+    cell.dataset.date = d.toISOString().slice(0,10);
+
+    // Tooltip text: date + day number
+    cell.dataset.tip = `Day ${i+1} · ${fmtDate(d)}` + (i < completed ? " · done" : " · left");
+
+    // Mark today with a faint accent outline (optional)
+    if (sameDate(d, todayMid)){
+      cell.style.outline = "2px solid rgba(96,165,250,.35)";
+      cell.style.outlineOffset = "1px";
+      cell.id = "todayCell";
+    }
+
+    frag.appendChild(cell);
+  }
+
+  gridEl.innerHTML = "";
+  gridEl.appendChild(frag);
+
+  // Tooltip behavior
+  gridEl.addEventListener("mousemove", (e) => {
+    const t = e.target.closest(".day");
+    if (!t) { tooltip.style.opacity = 0; return; }
+    tooltip.textContent = t.dataset.tip || "";
+    tooltip.style.left = e.clientX + "px";
+    tooltip.style.top = e.clientY + "px";
+    tooltip.style.opacity = 1;
+  });
+  gridEl.addEventListener("mouseleave", () => tooltip.style.opacity = 0);
+
+  // Jump to today
+  jumpTodayBtn.onclick = () => {
+    const el = document.getElementById("todayCell");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+    else {
+      // If today is outside range (before start / after end), jump near the nearest edge
+      const idx = todayMid < start ? 0 : totalDays - 1;
+      const edge = gridEl.querySelector(`.day[data-index="${idx}"]`);
+      if (edge) edge.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+
+  // If you want, auto-jump to today on load:
+  // setTimeout(() => jumpTodayBtn.click(), 200);
+}
+
+function sameDate(a,b){
+  return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+}
+function hashString(s){
+  let h = 0;
+  for (let i=0;i<s.length;i++) h = ((h<<5)-h) + s.charCodeAt(i) | 0;
+  return h;
+}
+
+build();
+</script>
+</body>
+</html>
