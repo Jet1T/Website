@@ -167,7 +167,16 @@
       font-size:.8rem;
       color:var(--muted);
     }
-
+    /* Make the progress card clickable */
+    .class-progress-card{
+      cursor: pointer;
+    }
+    
+    .class-progress-card:focus-within,
+    .class-progress-card:hover{
+      outline: 2px solid rgba(179,163,105,.25);
+      outline-offset: 2px;
+    }
   </style>
 </head>
 <body>
@@ -214,6 +223,25 @@
   </main>
 
   <script>
+    function wireGridLink(){
+  const card = document.getElementById('class29-progress');
+  const track = document.querySelector('.progress-track');
+
+  const go = () => window.location.href = './grid.html';
+
+  if (card) card.addEventListener('click', go);
+  if (track) track.addEventListener('click', (e) => { e.stopPropagation(); go(); });
+
+  // Keyboard accessibility (Enter/Space)
+  if (card){
+    card.setAttribute('role', 'link');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('aria-label', 'Open day grid');
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+    });
+  }
+}
     const ONE_DAY = 1000*60*60*24;
     function localDate(iso){const [y,m,d]=iso.split('-').map(Number);return new Date(y,m-1,d);}
     function startOfDay(d=new Date()){const x=new Date(d);x.setHours(0,0,0,0);return x;}
@@ -350,6 +378,7 @@
     }
 
     updateCounters();
+    wireGridLink();
     (function scheduleMidnightTick(){
       const now=new Date();
       const midnight=startOfDay(new Date(now));
