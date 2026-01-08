@@ -222,172 +222,104 @@
     </section>
   </main>
 
-  <script>
-    function wireGridLink(){
-  const card = document.getElementById('class29-progress');
-  const track = document.querySelector('.progress-track');
-
-  const go = () => window.location.href = './grid.html';
-
-  if (card) card.addEventListener('click', go);
-  if (track) track.addEventListener('click', (e) => { e.stopPropagation(); go(); });
-
-  // Keyboard accessibility (Enter/Space)
-  if (card){
-    card.setAttribute('role', 'link');
-    card.setAttribute('tabindex', '0');
-    card.setAttribute('aria-label', 'Open day grid');
-    card.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
-    });
+<script>
+  const ONE_DAY = 1000*60*60*24;
+  function localDate(iso){const [y,m,d]=iso.split('-').map(Number);return new Date(y,m-1,d);}
+  function startOfDay(d=new Date()){const x=new Date(d);x.setHours(0,0,0,0);return x;}
+  function daysUntilInclusive(target){
+    const t=startOfDay(target);
+    const today=startOfDay();
+    return Math.max(0,Math.ceil((t-today)/ONE_DAY));
   }
-}
-    const ONE_DAY = 1000*60*60*24;
-    function localDate(iso){const [y,m,d]=iso.split('-').map(Number);return new Date(y,m-1,d);}
-    function startOfDay(d=new Date()){const x=new Date(d);x.setHours(0,0,0,0);return x;}
-    function daysUntilInclusive(target){
-      const t=startOfDay(target);
-      const today=startOfDay();
-      return Math.max(0,Math.ceil((t-today)/ONE_DAY));
-    }
-    function nextAnnualDate(month,day){
-      const today=startOfDay();
-      const y=today.getFullYear();
-      const thisYear=new Date(y,month-1,day);
-      return thisYear>=today?thisYear:new Date(y+1,month-1,day);
-    }
-    function getNextGame(){
-      const schedule=[
-        {date:'2025-08-29',opponent:'Tarleton State'},
-        {date:'2025-09-06',opponent:'Kansas State'},
-        {date:'2025-09-20',opponent:'North Texas'},
-        {date:'2025-09-25',opponent:'East Carolina'},
-        {date:'2025-10-04',opponent:'UAB'},
-        {date:'2025-10-11',opponent:'Charlotte'},
-        {date:'2025-10-18',opponent:'Tulane'},
-        {date:'2025-11-01',opponent:'Air Force'},
-        {date:'2025-11-08',opponent:'Temple'},
-        {date:'2025-11-22',opponent:'Tulsa'},
-        {date:'2025-11-28',opponent:'UTSA'},
-        {date:'2025-12-13',opponent:'Navy'}
-      ].map(g=>({date:localDate(g.date),opponent:g.opponent}));
-      for(const g of schedule){
-        const d=daysUntilInclusive(g.date);
-        if(d>0)return g;
-        if(startOfDay(g.date).getTime()===startOfDay().getTime())return g;
-      }
-      const today=new Date();
-      const nextSat=startOfDay(new Date(today));
-      const dow=today.getDay();
-      const shift=(6-dow+7)%7||7;
-      nextSat.setDate(nextSat.getDate()+shift);
-      return{date:nextSat,opponent:'opponent for this week'};
+
+  function updateCounters(){
+    const now = new Date();
+    const todayStart = startOfDay();
+
+    const todayEl = document.getElementById('today');
+    if(todayEl){
+      todayEl.innerText = `Today is ${now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}!`;
     }
 
-        function updateClassProgress(){
-      // === CONFIG: update these dates as needed ===
-      const journeyStart = localDate('2025-06-30'); // R-Day ’29 (approx)
-      const journeyEnd   = localDate('2029-05-26'); // Grad ’29 (approx)
+    // === Dates ===
+    const armyNavy   = localDate('2025-12-13');
+    const decGrad    = localDate('2025-12-19');
+    const christmas  = localDate('2025-12-20');
+    const night500   = localDate('2026-01-09');
+    const yww        = localDate('2026-01-24');
+    const graduation = localDate('2026-05-23');
 
-      const today = startOfDay();
-      const totalMs = journeyEnd - journeyStart;
-      let elapsedMs = today - journeyStart;
+    // Helper: update or auto-hide a tile once it's past the event day
+    function updateOrRemoveTile(id, targetDate, makeText){
+      const el = document.getElementById(id);
+      if(!el) return;
 
-      if (elapsedMs < 0) elapsedMs = 0;
-      if (elapsedMs > totalMs) elapsedMs = totalMs;
+      const targetStart = startOfDay(targetDate);
 
-      const pct = totalMs > 0 ? (elapsedMs / totalMs) * 100 : 0;
-
-      const fillEl = document.querySelector('.progress-fill');
-      const pctEl  = document.getElementById('class29-percent');
-      if (fillEl) fillEl.style.width = pct.toFixed(2) + '%';
-      if (pctEl)  pctEl.textContent = pct.toFixed(1) + '% complete';
-
-      const track = document.querySelector('.progress-track');
-      if (!track || totalMs <= 0) return;
-
-      // Clear any existing markers so we can redraw each day
-      track.querySelectorAll('.marker').forEach(m => m.remove());
-
-      // Major milestones for Class of ’29
-      // ⚠️ Feel free to tweak these dates to match the real calendar
-      const milestones = [
-        { label: 'R-Day',            date: localDate('2025-06-30') },
-        { label: 'Grad ’29',        date: journeyEnd }
-      ];
-
-      milestones.forEach(ms => {
-        const offset = ms.date - journeyStart;
-        const pos = (offset / totalMs) * 100;
-        if (pos < 0 || pos > 100) return; // skip out-of-range
-
-        const marker = document.createElement('div');
-        marker.className = 'marker' + (ms.date <= today ? ' past' : '');
-        marker.style.left = pos + '%';
-
-        const label = document.createElement('div');
-        label.className = 'marker-label';
-        label.textContent = ms.label;
-
-        marker.appendChild(label);
-        track.appendChild(marker);
-      });
-    }
-    
-    function updateCounters(){
-      const now=new Date();
-      const todayEl=document.getElementById('today');
-      if(todayEl)todayEl.innerText=`Today is ${now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}!`;
-
-      const armyNavy=localDate('2025-12-13');
-      const decGrad=localDate('2025-12-19');
-      const christmas=localDate('2025-12-20');
-      const night500=localDate('2026-01-09');
-      const yww=localDate('2026-01-24');
-      const graduation=localDate('2026-05-23');
-
-      const setText=(id,text)=>{
-        const el=document.getElementById(id);
-        if(!el)return;
-        const v=el.querySelector('.value');
-        if(v)v.innerText=text;
-      };
-
-      // Army–Navy tile: hide starting the day after the game
-      const navyEl = document.getElementById('navy');
-      if (navyEl) {
-        const dayAfterArmyNavy = new Date(armyNavy);
-        dayAfterArmyNavy.setDate(dayAfterArmyNavy.getDate() + 1);
-        const todayStart = startOfDay();
-        if (todayStart >= dayAfterArmyNavy) {
-          navyEl.style.display = 'none';
-        } else {
-          setText('navy',`There are ${daysUntilInclusive(armyNavy)} and a butt days until Army beats the hell out of Navy in Football!`);
-        }
+      // If the event day is in the past, daysUntilInclusive() will be 0 too —
+      // so we explicitly check "past" and remove the tile.
+      if (targetStart < todayStart){
+        el.style.display = 'none';
+        return;
       }
 
-      setText('decgrad',`There are ${daysUntilInclusive(decGrad)} and a butt days until December Graduation!`);
-      setText('christmas',`There are ${daysUntilInclusive(christmas)} and a butt days until Christmas leave!`);
-      setText('night500',`There are ${daysUntilInclusive(night500)} and a butt days until 500th Night!`);
-      setText('yww',`There are ${daysUntilInclusive(yww)} and a butt days until Yearling Winter Weekend!`);
-      setText('grad',`There are ${daysUntilInclusive(graduation)} and a butt days until graduation and graduation leave for the class of 2026!`);
-
-            // Update Class of 2029 journey progress bar
-      updateClassProgress();
-
+      // Otherwise (today or future), show it (including 0 on the event day)
+      el.style.display = '';
+      const v = el.querySelector('.value');
+      if(v) v.innerText = makeText(daysUntilInclusive(targetDate));
     }
 
-    updateCounters();
-    wireGridLink();
-    (function scheduleMidnightTick(){
-      const now=new Date();
-      const midnight=startOfDay(new Date(now));
-      midnight.setDate(midnight.getDate()+1);
-      setTimeout(()=>{
-        updateCounters();
-        setInterval(updateCounters,ONE_DAY);
-      },midnight-now);
-    })();
-  </script>
+    updateOrRemoveTile(
+      'navy',
+      armyNavy,
+      (d) => `There are ${d} and a butt days until Army beats the hell out of Navy in Football!`
+    );
+
+    updateOrRemoveTile(
+      'decgrad',
+      decGrad,
+      (d) => `There are ${d} and a butt days until December Graduation!`
+    );
+
+    updateOrRemoveTile(
+      'christmas',
+      christmas,
+      (d) => `There are ${d} and a butt days until Christmas leave!`
+    );
+
+    updateOrRemoveTile(
+      'night500',
+      night500,
+      (d) => `There are ${d} and a butt days until 500th Night!`
+    );
+
+    updateOrRemoveTile(
+      'yww',
+      yww,
+      (d) => `There are ${d} and a butt days until Yearling Winter Weekend!`
+    );
+
+    updateOrRemoveTile(
+      'grad',
+      graduation,
+      (d) => `There are ${d} and a butt days until graduation and graduation leave for the class of 2026!`
+    );
+
+    // Progress bar
+    updateClassProgress();
+  }
+
+  updateCounters();
+  wireGridLink();
+  (function scheduleMidnightTick(){
+    const now=new Date();
+    const midnight=startOfDay(new Date(now));
+    midnight.setDate(midnight.getDate()+1);
+    setTimeout(()=>{
+      updateCounters();
+      setInterval(updateCounters,ONE_DAY);
+    },midnight-now);
+  })();
+</script>
 </body>
 </html>
