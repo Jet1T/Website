@@ -224,12 +224,90 @@
 
 <script>
   const ONE_DAY = 1000*60*60*24;
-  function localDate(iso){const [y,m,d]=iso.split('-').map(Number);return new Date(y,m-1,d);}
-  function startOfDay(d=new Date()){const x=new Date(d);x.setHours(0,0,0,0);return x;}
+
+  function localDate(iso){
+    const [y,m,d] = iso.split('-').map(Number);
+    return new Date(y, m-1, d);
+  }
+
+  function startOfDay(d=new Date()){
+    const x = new Date(d);
+    x.setHours(0,0,0,0);
+    return x;
+  }
+
   function daysUntilInclusive(target){
-    const t=startOfDay(target);
-    const today=startOfDay();
-    return Math.max(0,Math.ceil((t-today)/ONE_DAY));
+    const t = startOfDay(target);
+    const today = startOfDay();
+    return Math.max(0, Math.ceil((t - today) / ONE_DAY));
+  }
+
+  // Make progress card clickable + keyboard accessible
+  function wireGridLink(){
+    const card = document.getElementById('class29-progress');
+    const track = document.querySelector('.progress-track');
+
+    const go = () => window.location.href = './grid.html';
+
+    if (card) card.addEventListener('click', go);
+    if (track) track.addEventListener('click', (e) => { e.stopPropagation(); go(); });
+
+    if (card){
+      card.setAttribute('role', 'link');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', 'Open day grid');
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+      });
+    }
+  }
+
+  function updateClassProgress(){
+    // === CONFIG: update these dates as needed ===
+    const journeyStart = localDate('2025-06-30'); // R-Day ’29 (approx)
+    const journeyEnd   = localDate('2029-05-26'); // Grad ’29 (approx)
+
+    const today = startOfDay();
+    const totalMs = journeyEnd - journeyStart;
+    let elapsedMs = today - journeyStart;
+
+    if (elapsedMs < 0) elapsedMs = 0;
+    if (elapsedMs > totalMs) elapsedMs = totalMs;
+
+    const pct = totalMs > 0 ? (elapsedMs / totalMs) * 100 : 0;
+
+    const fillEl = document.querySelector('.progress-fill');
+    const pctEl  = document.getElementById('class29-percent');
+    if (fillEl) fillEl.style.width = pct.toFixed(2) + '%';
+    if (pctEl)  pctEl.textContent = pct.toFixed(1) + '% complete';
+
+    const track = document.querySelector('.progress-track');
+    if (!track || totalMs <= 0) return;
+
+    // Clear markers each update
+    track.querySelectorAll('.marker').forEach(m => m.remove());
+
+    const milestones = [
+      { label: 'R-Day',     date: journeyStart },
+      { label: 'Grad ’29',  date: journeyEnd }
+    ];
+
+    milestones.forEach(ms => {
+      const offset = ms.date - journeyStart;
+      const pos = (offset / totalMs) * 100;
+      if (pos < 0 || pos > 100) return;
+
+      const marker = document.createElement('div');
+      marker.className = 'marker' + (ms.date <= today ? ' past' : '');
+      marker.style.left = pos + '%';
+
+      const label = document.createElement('div');
+      label.className = 'marker-label';
+      label.textContent = ms.label;
+
+      marker.appendChild(label);
+      track.appendChild(marker);
+    });
   }
 
   function updateCounters(){
@@ -237,7 +315,7 @@
     const todayStart = startOfDay();
 
     const todayEl = document.getElementById('today');
-    if(todayEl){
+    if (todayEl){
       todayEl.innerText = `Today is ${now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}!`;
     }
 
@@ -249,76 +327,61 @@
     const yww        = localDate('2026-01-24');
     const graduation = localDate('2026-05-23');
 
-    // Helper: update or auto-hide a tile once it's past the event day
+    // Update OR remove tile once date is past (but keep it on the event day itself)
     function updateOrRemoveTile(id, targetDate, makeText){
       const el = document.getElementById(id);
-      if(!el) return;
+      if (!el) return;
 
       const targetStart = startOfDay(targetDate);
 
-      // If the event day is in the past, daysUntilInclusive() will be 0 too —
-      // so we explicitly check "past" and remove the tile.
+      // Past the event day → remove
       if (targetStart < todayStart){
         el.style.display = 'none';
         return;
       }
 
-      // Otherwise (today or future), show it (including 0 on the event day)
+      // Today or future → show (including 0 on event day)
       el.style.display = '';
       const v = el.querySelector('.value');
-      if(v) v.innerText = makeText(daysUntilInclusive(targetDate));
+      if (v) v.innerText = makeText(daysUntilInclusive(targetDate));
     }
 
-    updateOrRemoveTile(
-      'navy',
-      armyNavy,
-      (d) => `There are ${d} and a butt days until Army beats the hell out of Navy in Football!`
+    updateOrRemoveTile('navy', armyNavy, (d) =>
+      `There are ${d} and a butt days until Army beats the hell out of Navy in Football!`
     );
-
-    updateOrRemoveTile(
-      'decgrad',
-      decGrad,
-      (d) => `There are ${d} and a butt days until December Graduation!`
+    updateOrRemoveTile('decgrad', decGrad, (d) =>
+      `There are ${d} and a butt days until December Graduation!`
     );
-
-    updateOrRemoveTile(
-      'christmas',
-      christmas,
-      (d) => `There are ${d} and a butt days until Christmas leave!`
+    updateOrRemoveTile('christmas', christmas, (d) =>
+      `There are ${d} and a butt days until Christmas leave!`
     );
-
-    updateOrRemoveTile(
-      'night500',
-      night500,
-      (d) => `There are ${d} and a butt days until 500th Night!`
+    updateOrRemoveTile('night500', night500, (d) =>
+      `There are ${d} and a butt days until 500th Night!`
     );
-
-    updateOrRemoveTile(
-      'yww',
-      yww,
-      (d) => `There are ${d} and a butt days until Yearling Winter Weekend!`
+    updateOrRemoveTile('yww', yww, (d) =>
+      `There are ${d} and a butt days until Yearling Winter Weekend!`
     );
-
-    updateOrRemoveTile(
-      'grad',
-      graduation,
-      (d) => `There are ${d} and a butt days until graduation and graduation leave for the class of 2026!`
+    updateOrRemoveTile('grad', graduation, (d) =>
+      `There are ${d} and a butt days until graduation and graduation leave for the class of 2026!`
     );
 
     // Progress bar
     updateClassProgress();
   }
 
+  // Initial run
   updateCounters();
   wireGridLink();
+
+  // Tick at midnight
   (function scheduleMidnightTick(){
-    const now=new Date();
-    const midnight=startOfDay(new Date(now));
-    midnight.setDate(midnight.getDate()+1);
-    setTimeout(()=>{
+    const now = new Date();
+    const midnight = startOfDay(new Date(now));
+    midnight.setDate(midnight.getDate() + 1);
+    setTimeout(() => {
       updateCounters();
-      setInterval(updateCounters,ONE_DAY);
-    },midnight-now);
+      setInterval(updateCounters, ONE_DAY);
+    }, midnight - now);
   })();
 </script>
 </body>
