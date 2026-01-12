@@ -469,7 +469,7 @@
       }
 
       try{
-        const content = await loadBinary("template.docx");
+        const content = await loadBinary("./template.docx");
         const zip = new PizZip(content);
         const doc = new window.docxtemplater(zip, {
 			paragraphLoop: true,
