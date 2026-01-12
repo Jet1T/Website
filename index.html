@@ -472,9 +472,11 @@
         const content = await loadBinary("template.docx");
         const zip = new PizZip(content);
         const doc = new window.docxtemplater(zip, {
-          paragraphLoop: true,
-          linebreaks: true
-        });
+			paragraphLoop: true,
+			linebreaks: true,
+			delimiters: { start: "{{", end: "}}" }
+		});
+
 
         doc.setData(data);
 
