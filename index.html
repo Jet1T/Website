@@ -409,16 +409,16 @@
       const wantInit = (checked) => checked ? (initials || "____") : "____";
 
       const data = {
-        assignment_name: $("assignment_name").value.trim(),
-        class_name: $("class_name").value.trim(),
-        section: $("section").value.trim(),
-        instructor_rank: $("instructor_rank").value.trim(),
-        instructor_first: $("instructor_first").value.trim(),
-        instructor_last: $("instructor_last").value.trim(),
-        cadet_first: $("cadet_first").value.trim(),
-        cadet_last: $("cadet_last").value.trim(),
+        assignment_name: $("assignment_name").value.trim().toUpperCase(),
+        class_name: $("class_name").value.trim().toUpperCase(),
+        section: $("section").value.trim().toUpperCase(),
+        instructor_rank: $("instructor_rank").value.trim().toUpperCase(),
+        instructor_first: $("instructor_first").value.trim().toUpperCase(),
+        instructor_last: $("instructor_last").value.trim().toUpperCase(),
+        cadet_first: $("cadet_first").value.trim().toUpperCase(),
+        cadet_last: $("cadet_last").value.trim().toUpperCase(),
         class_year: $("class_year").value.trim(),
-        company: $("company").value.trim(),
+        company: $("company").value.trim().toUpperCase(),
 
         // date fields for the docx
         date_long: formatDate($("date_format").value),
