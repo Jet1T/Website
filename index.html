@@ -482,39 +482,24 @@
 
         try{
           doc.render();
-        } catch (error){
-          console.error(error);
-          showError(
-            "Template render error.\n\n" +
-            "Most common causes:\n" +
-            "• Your template.docx does not include the placeholders used by this site.\n" +
-            "• A placeholder got split across Word runs (retype it cleanly).\n\n" +
-            "Details:\n" + (error.message || String(error))
-          );
-          return;
-        }
+		} catch (error) {
+			console.error("DOCX ERROR:", error);
 
-        const out = doc.getZip().generate({
-          type: "blob",
-          mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        });
+  			if (error?.properties?.errors?.length) {
+    			const details = error.properties.errors.map((e, i) => {
+      			const exp = e?.properties?.explanation || e.message || "Unknown error";
+      			const tag = e?.properties?.tag || "(no tag)";
+      			const ctx = e?.properties?.context ? JSON.stringify(e.properties.context) : "";
+      			return `${i + 1}) ${exp}\n   tag: ${tag}\n   ${ctx}`;
+    		}).join("\n\n");
 
-        const filenameSafe = `${data.cadet_last || "Cadet"}_${data.assignment_name || "DAAW"}_coversheet.docx`
-          .replace(/[\\/:*?"<>|]+/g,"-")
-          .slice(0, 120);
+    		showError("Template render MultiError:\n\n" + details);
+  		} else {
+   			 showError("Error generating .docx:\n\n" + (error.message || String(error)));
+  		}
+  			return;
+		}
 
-        saveAs(out, filenameSafe);
-      } catch (e){
-        console.error(e);
-        showError(
-          "Could not load template.docx.\n\n" +
-          "Make sure:\n" +
-          "• template.docx is in the SAME folder as index.html\n" +
-          "• you opened index.html in a browser that allows local file access\n\n" +
-          "Error: " + (e.message || String(e))
-        );
-      }
-    }
 
     function fillDemo(){
   $("assignment_name").value = "Lesson Reflection";
