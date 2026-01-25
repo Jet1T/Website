@@ -1,582 +1,527 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DAAW Cover Sheet Generator</title>
+  <title>Scoreboard</title>
   <style>
     :root{
-      --bg:#0b1020;
-      --card:#121a33;
-      --muted:#9fb0ffcc;
-      --text:#eaf0ff;
-      --line:#2a3570;
-      --accent:#7aa2ff;
-      --accent2:#a7ffda;
-      --danger:#ff7a7a;
-      --radius:16px;
-      --shadow:0 14px 40px rgba(0,0,0,.35);
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --bg1:#070A12;
+      --bg2:#0B1024;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.10);
+      --text:#EAF0FF;
+      --muted: rgba(234,240,255,.7);
+      --line: rgba(234,240,255,.12);
+      --shadow: 0 18px 50px rgba(0,0,0,.55);
+      --radius: 22px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
 
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
       margin:0;
-      font-family:var(--sans);
-      background: radial-gradient(1200px 800px at 20% 0%, #1a2a6a55, transparent 55%),
-                  radial-gradient(900px 700px at 90% 10%, #0fe2a855, transparent 55%),
-                  var(--bg);
-      color:var(--text);
-      min-height:100vh;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(1100px 700px at 15% 20%, rgba(122,162,255,.18), transparent 55%),
+        radial-gradient(900px 600px at 85% 30%, rgba(167,255,218,.12), transparent 55%),
+        radial-gradient(800px 600px at 60% 90%, rgba(255,122,122,.08), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
       display:flex;
+      align-items:center;
       justify-content:center;
-      padding:24px;
-    }
-
-    .wrap{ width:min(980px, 100%); }
-
-    header{
-      display:flex;
-      flex-wrap:wrap;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:18px;
-    }
-
-    h1{
-      margin:0;
-      font-size: clamp(22px, 2.6vw, 34px);
-      letter-spacing:.2px;
-    }
-    .sub{
-      margin:6px 0 0 0;
-      color:var(--muted);
-      max-width:70ch;
-      line-height:1.35;
-      font-size: 14px;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap:16px;
-    }
-    @media (max-width: 860px){
-      .grid{ grid-template-columns: 1fr; }
-    }
-
-    .card{
-      background: linear-gradient(180deg, #141d3c, #0f1530);
-      border:1px solid #22306a;
-      border-radius:var(--radius);
-      box-shadow: var(--shadow);
       padding:18px;
     }
 
-    .section-title{
+    .wrap{
+      width:min(1100px, 100%);
       display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:12px;
-    }
-    .section-title h2{
-      margin:0;
-      font-size:16px;
-      letter-spacing:.2px;
-    }
-    .pill{
-      font-family:var(--mono);
-      font-size:12px;
-      color:var(--muted);
-      border:1px solid #2a3570;
-      padding:6px 10px;
-      border-radius:999px;
-      background:#0b102055;
+      flex-direction:column;
+      gap:14px;
     }
 
-    .row{
+    .topbar{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width: 220px;
+    }
+    .brand .title{
+      font-weight:700;
+      letter-spacing:.2px;
+      font-size:14px;
+      opacity:.95;
+    }
+    .brand .hint{
+      font-size:12px;
+      color: var(--muted);
+    }
+
+    .top-controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      padding:10px 12px;
+      border-radius: 14px;
+      font-weight:650;
+      cursor:pointer;
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{ background: rgba(255,255,255,.12); border-color: rgba(234,240,255,.22); }
+    .btn:active{ transform: translateY(1px) scale(.99); }
+    .btn.danger{ background: rgba(255,122,122,.12); border-color: rgba(255,122,122,.25); }
+    .btn.danger:hover{ background: rgba(255,122,122,.18); border-color: rgba(255,122,122,.35); }
+
+    .pill{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.06);
+    }
+    .pill label{
+      font-size:12px;
+      color: var(--muted);
+      font-weight:650;
+      letter-spacing:.15px;
+    }
+    .pill input{
+      width:64px;
+      font-family: var(--mono);
+      font-size:13px;
+      color: var(--text);
+      background: transparent;
+      border: none;
+      outline: none;
+      text-align:center;
+    }
+    .pill input::-webkit-outer-spin-button,
+    .pill input::-webkit-inner-spin-button{ -webkit-appearance: none; margin:0; }
+    .pill input[type=number]{ -moz-appearance:textfield; }
+
+    .board{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+    }
+
+    .side{
+      position:relative;
+      overflow:hidden;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      min-height: 420px;
+      padding: 18px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+
+    .side:before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(520px 220px at 30% 10%, rgba(122,162,255,.16), transparent 50%),
+        radial-gradient(520px 220px at 70% 90%, rgba(167,255,218,.10), transparent 55%);
+      pointer-events:none;
+      filter:saturate(120%);
+    }
+
+    .header{
+      position:relative;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .name{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      width:100%;
+    }
+
+    .name input{
+      width:100%;
+      font-size:16px;
+      font-weight:800;
+      color: var(--text);
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding:10px 12px;
+      outline:none;
+      transition: border-color .15s ease, background .15s ease;
+    }
+    .name input:focus{
+      border-color: rgba(234,240,255,.25);
+      background: rgba(255,255,255,.09);
+    }
+
+    .tag{
+      position:relative;
+      font-size:12px;
+      color: var(--muted);
+      font-family: var(--mono);
+      opacity:.95;
+    }
+
+    .score{
+      position:relative;
+      text-align:center;
+      font-family: var(--mono);
+      font-weight:900;
+      font-size: clamp(86px, 13vw, 160px);
+      line-height: 1;
+      letter-spacing: -2px;
+      margin: 10px 0 6px;
+      text-shadow: 0 12px 40px rgba(0,0,0,.45);
+    }
+
+    .winner{
+      animation: pop .16s ease-out;
+      filter: drop-shadow(0 16px 38px rgba(167,255,218,.18));
+    }
+    @keyframes pop{
+      from{ transform: scale(.98); opacity:.85; }
+      to{ transform: scale(1); opacity:1; }
+    }
+
+    .controls{
+      position:relative;
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap:12px;
-      margin-bottom:12px;
-    }
-    @media (max-width: 520px){
-      .row{ grid-template-columns: 1fr; }
+      margin-top: 8px;
     }
 
-    label{
-      display:block;
-      font-size:12px;
-      color:var(--muted);
-      margin:0 0 6px 2px;
-    }
-    input, select{
-      width:100%;
-      box-sizing:border-box;
-      border-radius:12px;
-      border:1px solid #2a3570;
-      background:#0b1020cc;
-      color:var(--text);
-      padding:10px 12px;
-      outline:none;
-      font-size:14px;
-    }
-    input:focus, select:focus{
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px #7aa2ff2b;
-    }
-
-    .checks{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      margin-top:6px;
-    }
-    .check{
-      display:flex;
-      align-items:flex-start;
-      gap:10px;
-      padding:10px 10px;
-      border:1px solid #22306a;
-      border-radius:12px;
-      background:#0b102055;
-    }
-    .check input[type="checkbox"]{
-      width:18px;
-      height:18px;
-      margin-top:2px;
-      accent-color: var(--accent2);
-    }
-    .check .txt{
-      line-height:1.25;
-      font-size:13px;
-      color:var(--text);
-    }
-    .check .mut{
-      display:block;
-      color:var(--muted);
-      font-size:12px;
-      margin-top:4px;
-    }
-
-    .actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:14px;
-    }
-    button{
-      border:0;
-      cursor:pointer;
-      border-radius:14px;
-      padding:10px 14px;
-      font-weight:700;
-      color:#081028;
-      background: linear-gradient(90deg, var(--accent), #8cc8ff);
-    }
-    button.secondary{
-      background: transparent;
+    .bigbtn{
+      border-radius: 18px;
+      padding: 16px 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.08);
       color: var(--text);
-      border:1px solid #2a3570;
+      cursor:pointer;
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+      font-weight:900;
+      font-size: 22px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      user-select:none;
     }
-    button:disabled{
-      opacity:.6;
-      cursor:not-allowed;
+    .bigbtn:hover{ background: rgba(255,255,255,.12); border-color: rgba(234,240,255,.22); }
+    .bigbtn:active{ transform: translateY(1px) scale(.99); }
+
+    .bigbtn.minus{
+      background: rgba(255,255,255,.06);
     }
 
-    .note{
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.4;
-      margin-top:12px;
-    }
-    .err{
-      margin-top:10px;
-      color: var(--danger);
-      font-size:13px;
-      display:none;
-      white-space:pre-wrap;
+    .footer-note{
+      position:relative;
+      margin-top: 10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: var(--mono);
     }
 
-    .preview{
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(234,240,255,.16);
+      border-radius: 999px;
+      padding: 10px 14px;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
       font-family: var(--mono);
       font-size: 12px;
-      color: #dfe7ffcc;
-      background:#070a14;
-      border:1px solid #22306a;
-      border-radius:12px;
-      padding:12px;
-      overflow:auto;
-      max-height: 420px;
-      line-height:1.35;
+      color: var(--text);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .toast.show{
+      opacity:1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    @media (max-width: 850px){
+      .board{ grid-template-columns: 1fr; }
+      .side{ min-height: 360px; }
+      .brand{ min-width: 0; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
-      <div>
-        <h1>DAAW Cover Sheet Generator</h1>
-        <p class="sub">
-          Fill it out → download a Word doc you can sign. Your data stays in your browser.
-        </p>
-      </div>
-      <div class="pill" id="todayPill">Loading date…</div>
-    </header>
-
-    <div class="grid">
-      <div class="card">
-        <div class="section-title">
-          <h2>Fill-in Fields</h2>
-          <span class="pill">Outputs: .docx</span>
-        </div>
-
-        <div class="row">
-          <div>
-            <label for="assignment_name">Assignment title</label>
-            <input id="assignment_name" placeholder="e.g., Lesson 3 Reflection" />
-          </div>
-          <div>
-            <label for="class_name">Class</label>
-            <input id="class_name" placeholder="e.g., PL150 Psychology & Leadership" />
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label for="section">Section</label>
-            <input id="section" placeholder="e.g., H2" />
-          </div>
-          <div>
-            <label for="company">Company</label>
-            <input id="company" placeholder="e.g., D4" />
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label for="cadet_first">Cadet first</label>
-            <input id="cadet_first" placeholder="First" />
-          </div>
-          <div>
-            <label for="cadet_last">Cadet last</label>
-            <input id="cadet_last" placeholder="Last" />
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label for="class_year">Class year (2-digit)</label>
-            <input id="class_year" placeholder="29" inputmode="numeric" />
-          </div>
-          <div>
-            <label for="initials">Initials (for checkbox lines)</label>
-            <input id="initials" placeholder="e.g., JTD" />
-          </div>
-        </div>
-
-        <div class="section-title" style="margin-top:14px;">
-          <h2>Instructor</h2>
-        </div>
-
-        <div class="row">
-          <div>
-            <label for="instructor_rank">Rank</label>
-            <input id="instructor_rank" placeholder="e.g., CPT" />
-          </div>
-          <div>
-            <label for="instructor_first">First</label>
-            <input id="instructor_first" placeholder="First" />
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label for="instructor_last">Last</label>
-            <input id="instructor_last" placeholder="Last" />
-          </div>
-          <div>
-            <label for="date_format">Date format</label>
-            <select id="date_format">
-              <option value="DD_M_YYYY">DD M YYYY (11 Jan 2026)</option>
-              <option value="DD_MMM_YYYY">DD MMM YYYY (11 JAN 2026)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button id="btnGenerate">Generate .docx</button>
-          <button class="secondary" id="btnFillDemo" type="button">Fill demo data</button>
-          <button class="secondary" id="btnClear" type="button">Clear</button>
-        </div>
-
-        <div class="err" id="errBox"></div>
-
-        <p class="note">
-          Requires a <span style="font-family:var(--mono)">template.docx</span> in the same folder that contains placeholders like
-          <span style="font-family:var(--mono)">{{assignment_name}}</span>.
-        </p>
+    <div class="topbar">
+      <div class="brand">
+        <div class="title">Scoreboard</div>
+        <div class="hint">Keys: <b>A</b>/<b>Z</b> (left +/−), <b>K</b>/<b>M</b> (right +/−), <b>R</b> reset</div>
       </div>
 
-      <div class="card">
-        <div class="section-title">
-          <h2>Initial which lines?</h2>
-          <span class="pill">Choose boxes → inserts initials</span>
+      <div class="top-controls">
+        <div class="pill" title="First to this score gets highlighted (optional)">
+          <label for="winTo">PLAY TO</label>
+          <input id="winTo" type="number" min="1" step="1" value="11" />
         </div>
 
-        <div class="checks">
-          <div class="check">
-            <input type="checkbox" id="chk_sources" />
-            <div class="txt">
-              “I certify I have completely documented all sources…”
-              <span class="mut">Puts your initials in the blank before this statement.</span>
-            </div>
-          </div>
-
-          <div class="check">
-            <input type="checkbox" id="chk_no_sources" />
-            <div class="txt">
-              “I certify I did not use any sources or receive any assistance requiring documentation…”
-              <span class="mut">Puts your initials in the blank before this statement.</span>
-            </div>
-          </div>
-
-          <div class="check">
-            <input type="checkbox" id="chk_ai_used" />
-            <div class="txt">
-              “I acknowledge that I used generative AI…”
-              <span class="mut">Puts your initials in the blank before this statement.</span>
-            </div>
-          </div>
-
-          <div class="check">
-            <input type="checkbox" id="chk_ai_not_used" />
-            <div class="txt">
-              “I acknowledge that I did not use generative AI…”
-              <span class="mut">Puts your initials in the blank before this statement.</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="section-title" style="margin-top:14px;">
-          <h2>What gets sent into the template</h2>
-          <span class="pill">preview</span>
-        </div>
-        <div class="preview" id="previewBox"></div>
-
-        <p class="note">
-          Signature line stays blank so you can sign by hand. You can also leave the signature date blank if you want.
-        </p>
+        <button class="btn" id="swapBtn" title="Swap sides">Swap</button>
+        <button class="btn danger" id="resetBtn" title="Reset scores">Reset</button>
       </div>
+    </div>
+
+    <div class="board" id="board">
+      <!-- LEFT -->
+      <section class="side" data-side="left">
+        <div>
+          <div class="header">
+            <div class="name">
+              <input id="nameLeft" type="text" value="Left" maxlength="24" aria-label="Left player name">
+              <div class="tag">LEFT SIDE</div>
+            </div>
+          </div>
+
+          <div class="score" id="scoreLeft" aria-live="polite">0</div>
+
+          <div class="controls">
+            <button class="bigbtn plus" id="plusLeft" aria-label="Left plus one">+ <span style="opacity:.7;font-weight:800;">1</span></button>
+            <button class="bigbtn minus" id="minusLeft" aria-label="Left minus one">− <span style="opacity:.7;font-weight:800;">1</span></button>
+          </div>
+        </div>
+
+        <div class="footer-note">
+          <span>Tap buttons or use keyboard</span>
+          <span id="statusLeft"></span>
+        </div>
+      </section>
+
+      <!-- RIGHT -->
+      <section class="side" data-side="right">
+        <div>
+          <div class="header">
+            <div class="name">
+              <input id="nameRight" type="text" value="Right" maxlength="24" aria-label="Right player name">
+              <div class="tag">RIGHT SIDE</div>
+            </div>
+          </div>
+
+          <div class="score" id="scoreRight" aria-live="polite">0</div>
+
+          <div class="controls">
+            <button class="bigbtn plus" id="plusRight" aria-label="Right plus one">+ <span style="opacity:.7;font-weight:800;">1</span></button>
+            <button class="bigbtn minus" id="minusRight" aria-label="Right minus one">− <span style="opacity:.7;font-weight:800;">1</span></button>
+          </div>
+        </div>
+
+        <div class="footer-note">
+          <span>Clean & readable from far away</span>
+          <span id="statusRight"></span>
+        </div>
+      </section>
     </div>
   </div>
 
-  <!-- Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.6/dist/pizzip.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.49.0/build/docxtemplater.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.6/dist/pizzip-utils.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <div class="toast" id="toast">Reset.</div>
 
   <script>
-    const $ = (id) => document.getElementById(id);
+    // ---------- State ----------
+    const els = {
+      winTo: document.getElementById('winTo'),
+      reset: document.getElementById('resetBtn'),
+      swap: document.getElementById('swapBtn'),
+      board: document.getElementById('board'),
+      toast: document.getElementById('toast'),
 
-    function pad2(n){ return String(n).padStart(2,'0'); }
+      nameL: document.getElementById('nameLeft'),
+      nameR: document.getElementById('nameRight'),
 
-    function formatDate(mode){
-      const d = new Date();
-      const day = pad2(d.getDate());
-      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-      const m = months[d.getMonth()];
-      const y = d.getFullYear();
+      scoreL: document.getElementById('scoreLeft'),
+      scoreR: document.getElementById('scoreRight'),
 
-      if (mode === "DD_MMM_YYYY") {
-        return `${day} ${m.toUpperCase()} ${y}`;
+      plusL: document.getElementById('plusLeft'),
+      minusL: document.getElementById('minusLeft'),
+      plusR: document.getElementById('plusRight'),
+      minusR: document.getElementById('minusRight'),
+
+      statusL: document.getElementById('statusLeft'),
+      statusR: document.getElementById('statusRight'),
+    };
+
+    const STORAGE_KEY = "scoreboard_v1";
+
+    const state = {
+      left: 0,
+      right: 0,
+      nameLeft: "Left",
+      nameRight: "Right",
+      winTo: 11,
+      swapped: false
+    };
+
+    function clamp(n, min, max){ return Math.min(max, Math.max(min, n)); }
+
+    function showToast(msg){
+      els.toast.textContent = msg;
+      els.toast.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => els.toast.classList.remove('show'), 900);
+    }
+
+    function save(){
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    function load(){
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return;
+        const parsed = JSON.parse(raw);
+        Object.assign(state, parsed);
+      } catch {}
+    }
+
+    function getWinTo(){
+      const v = parseInt(els.winTo.value, 10);
+      return Number.isFinite(v) ? clamp(v, 1, 999) : 11;
+    }
+
+    function render(){
+      els.nameL.value = state.nameLeft;
+      els.nameR.value = state.nameRight;
+
+      els.winTo.value = state.winTo;
+
+      els.scoreL.textContent = state.left;
+      els.scoreR.textContent = state.right;
+
+      // winner highlight
+      const winTo = state.winTo;
+      const lWin = state.left >= winTo && state.left > state.right;
+      const rWin = state.right >= winTo && state.right > state.left;
+
+      els.scoreL.classList.toggle('winner', lWin);
+      els.scoreR.classList.toggle('winner', rWin);
+
+      els.statusL.textContent = lWin ? "WIN" : "";
+      els.statusR.textContent = rWin ? "WIN" : "";
+
+      save();
+    }
+
+    function bump(side, delta){
+      state[side] = clamp(state[side] + delta, 0, 999);
+      render();
+    }
+
+    function reset(){
+      state.left = 0;
+      state.right = 0;
+      render();
+      showToast("Reset.");
+    }
+
+    function swapSides(){
+      // swap names and scores
+      [state.left, state.right] = [state.right, state.left];
+      [state.nameLeft, state.nameRight] = [state.nameRight, state.nameLeft];
+
+      // swap UI positions by swapping DOM nodes
+      const children = Array.from(els.board.children);
+      if(children.length === 2){
+        els.board.insertBefore(children[1], children[0]);
       }
-      // default: 11 Jan 2026 style
-      return `${day} ${m} ${y}`;
+      state.swapped = !state.swapped;
+      render();
+      showToast("Swapped sides.");
     }
 
-    function showError(msg){
-      const box = $("errBox");
-      box.style.display = msg ? "block" : "none";
-      box.textContent = msg || "";
+    // ---------- Wiring ----------
+    load();
+
+    // If previously swapped, swap DOM on load to match
+    if(state.swapped){
+      const children = Array.from(els.board.children);
+      if(children.length === 2){
+        els.board.insertBefore(children[1], children[0]);
+      }
     }
 
-    function getFormData(){
-      const initials = $("initials").value.trim();
-      const wantInit = (checked) => checked ? (initials || "____") : "____";
+    render();
 
-      const data = {
-        assignment_name: $("assignment_name").value.trim().toUpperCase(),
-        class_name: $("class_name").value.trim().toUpperCase(),
-        section: $("section").value.trim().toUpperCase(),
-        instructor_rank: $("instructor_rank").value.trim().toUpperCase(),
-        instructor_first: $("instructor_first").value.trim().toUpperCase(),
-        instructor_last: $("instructor_last").value.trim().toUpperCase(),
-        cadet_first: $("cadet_first").value.trim().toUpperCase(),
-        cadet_last: $("cadet_last").value.trim().toUpperCase(),
-        class_year: $("class_year").value.trim(),
-        company: $("company").value.trim().toUpperCase(),
+    els.plusL.addEventListener('click', () => bump('left', +1));
+    els.minusL.addEventListener('click', () => bump('left', -1));
+    els.plusR.addEventListener('click', () => bump('right', +1));
+    els.minusR.addEventListener('click', () => bump('right', -1));
 
-        // date fields for the docx
-        date_long: formatDate($("date_format").value),
-        signature_date: formatDate($("date_format").value), // change to "" if you want blank
+    els.reset.addEventListener('click', reset);
+    els.swap.addEventListener('click', swapSides);
 
-        // initials blanks for each line
-        init_sources: wantInit($("chk_sources").checked),
-        init_no_sources: wantInit($("chk_no_sources").checked),
-        init_ai_used: wantInit($("chk_ai_used").checked),
-        init_ai_not_used: wantInit($("chk_ai_not_used").checked),
-      };
-      return data;
-    }
+    els.nameL.addEventListener('input', (e) => { state.nameLeft = e.target.value || "Left"; save(); });
+    els.nameR.addEventListener('input', (e) => { state.nameRight = e.target.value || "Right"; save(); });
 
-    function updatePreview(){
-      const data = getFormData();
-      $("previewBox").textContent = JSON.stringify(data, null, 2);
-    }
-
-    // Keep preview live
-    document.addEventListener("input", (e) => {
-      if (e.target && e.target.matches("input,select")) updatePreview();
+    els.winTo.addEventListener('change', () => {
+      state.winTo = getWinTo();
+      render();
+      showToast("Play to " + state.winTo);
     });
 
-    function requiredFieldsMissing(data){
-      const req = ["assignment_name","class_name","section","cadet_first","cadet_last","company","class_year"];
-      const missing = req.filter(k => !data[k]);
-      return missing;
-    }
+    // Keyboard shortcuts (ignore when typing in inputs)
+    window.addEventListener('keydown', (e) => {
+      const tag = (document.activeElement && document.activeElement.tagName) || "";
+      if(tag === "INPUT" || tag === "TEXTAREA") return;
 
-    async function loadBinary(url){
-  // Use fetch (more reliable on GitHub Pages than PizZipUtils XHR)
-  const absolute = new URL(url, window.location.href).toString();
-  const res = await fetch(absolute, { cache: "no-store" });
+      const k = e.key.toLowerCase();
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(
-      `Template fetch failed: ${res.status} ${res.statusText}\nURL: ${absolute}\nBody starts: ${text.slice(0, 120)}`
-    );
-  }
-
-  const ct = res.headers.get("content-type") || "";
-  if (!ct.includes("officedocument") && !ct.includes("application/octet-stream")) {
-    const text = await res.text().catch(() => "");
-    throw new Error(
-      `Template returned unexpected content-type: ${ct}\nURL: ${absolute}\nBody starts: ${text.slice(0, 120)}`
-    );
-  }
-
-  return await res.arrayBuffer();
-}
-
-async function generateDocx(){
-  showError("");
-  const data = getFormData();
-
-  const missing = requiredFieldsMissing(data);
-  if (missing.length){
-    showError("Missing required fields: " + missing.join(", "));
-    return;
-  }
-
-  try{
-    const content = await loadBinary("./template.docx");
-    const zip = new PizZip(content);
-
-    const doc = new window.docxtemplater(zip, {
-      paragraphLoop: true,
-      linebreaks: true,
-      delimiters: { start: "{{", end: "}}" } // matches your {{tags}}
+      if(k === 'a') bump('left', +1);
+      else if(k === 'z') bump('left', -1);
+      else if(k === 'k') bump('right', +1);
+      else if(k === 'm') bump('right', -1);
+      else if(k === 'r') reset();
+      else if(k === 's') swapSides();
     });
-
-    doc.setData(data);
-
-    // Render (this is where MultiError happens)
-    doc.render();
-
-    // If render succeeds, generate and download
-    const out = doc.getZip().generate({
-      type: "blob",
-      mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    });
-
-    const filenameSafe = `${data.cadet_last || "Cadet"}_${data.assignment_name || "DAAW"}_coversheet.docx`
-      .replace(/[\\/:*?"<>|]+/g,"-")
-      .slice(0, 120);
-
-    saveAs(out, filenameSafe);
-
-  } catch (error){
-    console.error("DOCX ERROR:", error);
-
-    // Docxtemplater MultiError details
-    if (error?.properties?.errors?.length) {
-      const details = error.properties.errors.map((e, i) => {
-        const exp = e?.properties?.explanation || e.message || "Unknown error";
-        const tag = e?.properties?.tag || "(no tag)";
-        const ctx = e?.properties?.context ? JSON.stringify(e.properties.context) : "";
-        return `${i + 1}) ${exp}\n   tag: ${tag}\n   ${ctx}`;
-      }).join("\n\n");
-
-      showError("Template render MultiError:\n\n" + details);
-      return;
-    }
-
-    // Fetch/load/etc errors
-    showError("Error generating .docx:\n\n" + (error.message || String(error)));
-    return;
-  }
-}
-
-
-    function fillDemo(){
-  $("assignment_name").value = "Lesson Reflection";
-  $("class_name").value = "PL150 Psychology & Leadership";
-  $("section").value = "H2";
-  $("company").value = "D4";
-
-  // Demo cadet info (NO Jet references)
-  $("cadet_first").value = "John";
-  $("cadet_last").value = "Doe";
-  $("class_year").value = "29";
-  $("initials").value = "JTD";
-
-  // Demo instructor info
-  $("instructor_rank").value = "CPT";
-  $("instructor_first").value = "John";
-  $("instructor_last").value = "Thayer";
-
-  // Demo checkbox selections
-  $("chk_sources").checked = true;
-  $("chk_no_sources").checked = false;
-  $("chk_ai_used").checked = false;
-  $("chk_ai_not_used").checked = true;
-
-  updatePreview();
-}
-
-
-    function clearAll(){
-      document.querySelectorAll("input").forEach(i => {
-        if (i.type === "checkbox") i.checked = false;
-        else i.value = "";
-      });
-      $("date_format").value = "DD_M_YYYY";
-      showError("");
-      updatePreview();
-    }
-
-    // wire up
-    $("btnGenerate").addEventListener("click", generateDocx);
-    $("btnFillDemo").addEventListener("click", fillDemo);
-    $("btnClear").addEventListener("click", clearAll);
-
-    // init
-    $("todayPill").textContent = "Today: " + formatDate("DD_M_YYYY");
-    updatePreview();
   </script>
 </body>
 </html>
