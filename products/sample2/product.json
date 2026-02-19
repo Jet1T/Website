@@ -1,0 +1,10 @@
+{
+  "name": "Sample2",
+  "price": 999,
+  "shortDescription": "Sample Text Short",
+  "fullDescription": "Longer more detailed sample text here",
+  "contactEmail": "MacShortSolutions@gmail.com",
+  "optionalTags": ["Info", "Goes", "here"],
+  "images": ["1.svg", "2.svg"],
+  "created": "2026-02-01"
+}
