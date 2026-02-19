@@ -1,6 +1,6 @@
 const APP = {
   siteName: "Mac Short Solutions",
-  tagline: "Delivery in Person",
+  tagline: "Not affiliated with USMA or DoW",
   contactEmail: "MacShortSolutions@gmail.com"
 };
 
@@ -267,3 +267,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 });
+
