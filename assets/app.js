@@ -193,6 +193,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     $("#siteName").textContent = APP.siteName;
     $("#siteTagline").textContent = APP.tagline;
 
+    // make modal respect sticky header height
+    const header = document.querySelector("header.top");
+    if (header){
+      document.documentElement.style.setProperty("--header-h", `${header.offsetHeight}px`);
+      window.addEventListener("resize", () => {
+        document.documentElement.style.setProperty("--header-h", `${header.offsetHeight}px`);
+      });
+    }
+
+    
     // footer email
     const footerLink = $("#footerEmailLink");
     if (footerLink){
@@ -267,4 +277,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 });
+
 
