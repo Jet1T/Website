@@ -44,9 +44,21 @@ a{color:inherit}
 
 .title{display:flex; align-items:center; gap:12px;}
 .logo{
-  width:34px; height:34px; border-radius:10px;
+  width:34px;
+  height:34px;
+  border-radius:10px;
   background: var(--accent);
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
+
+.logo img{
+  width:22px;
+  height:22px;
+  object-fit:contain;
+}
+
 .name{font-weight:800; letter-spacing:.2px;}
 .sub{color:var(--muted); font-size:13px; margin-top:2px;}
 
@@ -204,3 +216,4 @@ a{color:inherit}
   overflow:hidden;
 }
 .video video{width:100%; display:block;}
+
