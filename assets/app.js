@@ -31,7 +31,7 @@ function escapeHtml(str){
 }
 
 function getTheme(){
-  return localStorage.getItem("theme") || "light";
+  return localStorage.getItem("theme") || "dark";
 }
 function setTheme(theme){
   document.documentElement.setAttribute("data-theme", theme);
@@ -350,3 +350,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (root) root.innerHTML = `<div class="notice">Something went wrong loading this page.</div>`;
   }
 });
+
