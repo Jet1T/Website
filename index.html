@@ -3,87 +3,61 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MSS | Home</title>
+  <title>MSS - Store</title>
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
-<body data-page="home">
-  <header class="nav">
-    <div class="container nav-inner">
-      <a class="brand" href="index.html" aria-label="Home">
-        <span class="brand-badge" aria-hidden="true"></span>
-        <span id="brandText">Mac Short Solutions</span>
-      </a>
+<body>
+  <header class="top">
+    <div class="container">
+      <div class="top-row">
+        <div class="title">
+          <div class="logo"></div>
+          <div>
+            <div class="name" id="siteName">Mac Short Solutions</div>
+            <div class="sub" id="siteTagline">Delivery in Person</div>
+          </div>
+        </div>
 
-      <nav class="nav-links" aria-label="Primary navigation">
-        <a href="index.html">Home</a>
-        <a href="products.html">Products</a>
-      </nav>
+        <button class="toggle" id="themeToggle" type="button" aria-label="Toggle theme">☾</button>
+      </div>
 
-      <div class="nav-actions">
-        <button class="pill" id="themeToggle" type="button">☀ Light</button>
+      <div class="controls">
+        <input id="searchInput" class="search" placeholder="Search (name or tag)..." />
+        <select id="tagSelect" class="select" aria-label="Filter by tag"></select>
+        <select id="sortSelect" class="select" aria-label="Sort">
+          <option value="featured">Sort: featured</option>
+          <option value="price-asc">Price: low → high</option>
+          <option value="price-desc">Price: high → low</option>
+          <option value="name">Name: A → Z</option>
+        </select>
+        <div class="count" id="resultsCount">—</div>
       </div>
     </div>
   </header>
 
   <main class="container">
-    <section class="hero">
-      <div class="hero-grid">
-        <div class="card hero-left">
-          <div class="kicker"><span class="dot"></span><span id="taglineText">About MSS</span></div>
-          <h1>One Cadet to Another</h1>
-          <p class="sub">
-
-            Browse the solutions I have already found or designed. To buy something, shoot me an email with what you'd like. Feel free to make product suggestions as well.
-          </p>
-          <div class="cta-row">
-            <a class="btn primary" href="products.html">View Products</a>
-          </div>
-        </div>
-
-        <div class="card hero-right">
-          <div class="stat"><strong>Catalog</strong><span id="statCount">—</span></div>
-          <div class="stat"><strong>Purchases</strong><span id="statMode">—</span></div>
-          <div class="stat"><strong>Delivery</strong><span id="statSpeed">—</span></div>
-          <div class="notice">
-            <strong>All purchases go to a good cause</strong>
-            <div class="small">Retirement or American Burrito</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <h2>Featured</h2>
-      <div id="featuredGrid" class="grid"></div>
-      <div id="pageError" style="margin-top:14px;"></div>
-    </section>
+    <div id="productsGrid" class="grid"></div>
+    <div id="pageError" class="error"></div>
   </main>
 
-<footer class="footer">
-  <div class="container footer-inner">
-    <div class="small">
-      To purchase: email <a href="mailto:MacShortSolutions@gmail.com">MacShortSolutions@gmail.com</a> with the product name.
-      <span style="opacity:.7">No checkout — in-person handoff.</span>
-    </div>
-    <div class="mini-links">
-      <a href="index.html">Home</a>
-      <a href="products.html">Products</a>
+  <!-- Simple modal -->
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close="true"></div>
+    <div class="modal-card" role="dialog" aria-modal="true">
+      <button class="modal-x" data-close="true" aria-label="Close">✕</button>
+      <div id="modalBody"></div>
     </div>
   </div>
-</footer>
+
+  <footer class="footer">
+    <div class="container foot">
+      <div>
+        For buying, product suggestions, and hate mail: email <a id="footerEmailLink" href="#">—</a>.
+      </div>
+      <div class="muted" id="footerNote">MSS</div>
+    </div>
+  </footer>
 
   <script src="assets/app.js"></script>
-  <script>
-    // tiny extra: mirror brand name in footer if desired
-    document.addEventListener("DOMContentLoaded", () => {
-      const b = document.querySelector("#brandText")?.textContent || "Mac Short Solutions";
-      const b2 = document.querySelector("#brandText2");
-      if (b2) b2.textContent = b;
-    });
-  </script>
 </body>
 </html>
-
-
-
-

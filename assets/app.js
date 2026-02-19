@@ -1,26 +1,11 @@
-/* =========================================================
-   Zero-build GitHub Pages shopfront
-   - Loads products/products.json (manifest)
-   - Loads each product's /products/<slug>/product.json
-   - Renders cards, detail view, search, tags, sort
-   ========================================================= */
-
 const APP = {
   siteName: "Mac Short Solutions",
-  tagline: "Solving problems since 2026",
-  contactEmail: "MacShortSolutions@gmail.com", // used on Contact page
+  tagline: "Delivery in Person",
+  contactEmail: "MacShortSolutions@gmail.com"
 };
 
 function $(sel, root=document){ return root.querySelector(sel); }
 function $all(sel, root=document){ return [...root.querySelectorAll(sel)]; }
-
-function money(n){
-  if (n === null || n === undefined || n === "") return "";
-  const x = Number(n);
-  if (Number.isNaN(x)) return String(n);
-  return x.toLocaleString(undefined, { style:"currency", currency:"USD" });
-}
-
 function escapeHtml(str){
   return String(str ?? "")
     .replaceAll("&","&amp;")
@@ -29,24 +14,24 @@ function escapeHtml(str){
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
 }
-
-function getTheme(){
-  return localStorage.getItem("theme") || "dark";
+function money(n){
+  if (n === null || n === undefined || n === "") return "";
+  const x = Number(n);
+  if (Number.isNaN(x)) return String(n);
+  return x.toLocaleString(undefined, { style:"currency", currency:"USD" });
 }
+
+function getTheme(){ return localStorage.getItem("theme") || "dark"; }
 function setTheme(theme){
   document.documentElement.setAttribute("data-theme", theme);
   localStorage.setItem("theme", theme);
   const btn = $("#themeToggle");
-  if (btn) btn.textContent = theme === "dark" ? "☾ Dark" : "☀ Light";
+  if (btn) btn.textContent = theme === "dark" ? "☾" : "☀";
 }
 function initTheme(){
   setTheme(getTheme());
   const btn = $("#themeToggle");
-  if (btn){
-    btn.addEventListener("click", () => {
-      setTheme(getTheme() === "dark" ? "light" : "dark");
-    });
-  }
+  if (btn) btn.addEventListener("click", ()=> setTheme(getTheme()==="dark" ? "light" : "dark"));
 }
 
 async function fetchJson(url){
@@ -55,90 +40,35 @@ async function fetchJson(url){
   return await res.json();
 }
 
-/** Loads all products via manifest -> product.json per slug */
 async function loadAllProducts(){
   const manifest = await fetchJson("products/products.json");
   const slugs = manifest.products || [];
   const items = [];
+
   for (const slug of slugs){
     try{
       const p = await fetchJson(`products/${slug}/product.json`);
       p.slug = slug;
       items.push(p);
-    }catch(err){
-      console.warn("Skipping product:", slug, err);
+    }catch(e){
+      console.warn("Skipping product", slug, e);
     }
   }
-  // default sort: newest first if "created" exists, else by name
+
+  // default order: created desc then name
   items.sort((a,b)=>{
     const da = a.created ? new Date(a.created).getTime() : 0;
     const db = b.created ? new Date(b.created).getTime() : 0;
     if (db !== da) return db - da;
     return String(a.name||"").localeCompare(String(b.name||""));
   });
+
   return items;
 }
 
-function productPrimaryImage(product){
-  // IMPORTANT: browsers cannot list folders, so product.json must list images.
-  const first = (product.images && product.images.length) ? product.images[0] : null;
-  if (!first) return null;
-  return `products/${product.slug}/images/${first}`;
-}
-
-function renderProductCard(product){
-  const img = productPrimaryImage(product);
-  const tags = Array.isArray(product.optionalTags) ? product.optionalTags : [];
-  return `
-    <a class="card product-card" href="product.html?slug=${encodeURIComponent(product.slug)}">
-      <div class="thumb">
-        ${img
-          ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(product.name)}" loading="lazy">`
-          : `<div class="notice">No image set</div>`
-        }
-      </div>
-      <div class="pc-body">
-        <div class="pc-top">
-          <div class="pc-name">${escapeHtml(product.name || "Untitled")}</div>
-          <div class="pc-price">${escapeHtml(money(product.price))}</div>
-        </div>
-        <p class="pc-desc">${escapeHtml(product.shortDescription || "")}</p>
-        ${tags.length ? `<div class="tags">${tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join("")}</div>` : ""}
-      </div>
-    </a>
-  `;
-}
-
-function applyFiltersSort(products, { q="", tag="all", sort="featured" }){
-  let out = [...products];
-
-  // search by name (and optionally tags)
-  const qq = q.trim().toLowerCase();
-  if (qq){
-    out = out.filter(p=>{
-      const name = String(p.name||"").toLowerCase();
-      const tags = (p.optionalTags||[]).map(x=>String(x).toLowerCase());
-      return name.includes(qq) || tags.some(t=>t.includes(qq));
-    });
-  }
-
-  // tag filter
-  if (tag !== "all"){
-    out = out.filter(p => (p.optionalTags||[]).includes(tag));
-  }
-
-  // sort
-  if (sort === "price-asc"){
-    out.sort((a,b)=>Number(a.price||0)-Number(b.price||0));
-  } else if (sort === "price-desc"){
-    out.sort((a,b)=>Number(b.price||0)-Number(a.price||0));
-  } else if (sort === "name"){
-    out.sort((a,b)=>String(a.name||"").localeCompare(String(b.name||"")));
-  } else {
-    // "featured": keep default load order (already sorted by created/name)
-  }
-
-  return out;
+function productPrimaryImage(p){
+  const first = (p.images && p.images.length) ? p.images[0] : null;
+  return first ? `products/${p.slug}/images/${first}` : null;
 }
 
 function uniqueTags(products){
@@ -149,207 +79,191 @@ function uniqueTags(products){
   return [...set].sort((a,b)=>String(a).localeCompare(String(b)));
 }
 
-/* -------------------------
-   Page initializers
-   ------------------------- */
+function applyFiltersSort(products, { q="", tag="all", sort="featured" }){
+  let out = [...products];
 
-async function initCommon(){
-  initTheme();
+  const qq = q.trim().toLowerCase();
+  if (qq){
+    out = out.filter(p=>{
+      const name = String(p.name||"").toLowerCase();
+      const tags = (p.optionalTags||[]).map(x=>String(x).toLowerCase());
+      return name.includes(qq) || tags.some(t=>t.includes(qq));
+    });
+  }
 
-  // active nav link
-  const path = (location.pathname.split("/").pop() || "index.html").toLowerCase();
-  $all(".nav-links a").forEach(a=>{
-    const href = (a.getAttribute("href") || "").toLowerCase();
-    if (href === path) a.classList.add("active");
-  });
+  if (tag !== "all") out = out.filter(p => (p.optionalTags||[]).includes(tag));
 
-  // fill brand text
-  const brandText = $("#brandText");
-  if (brandText) brandText.textContent = APP.siteName;
+  if (sort === "price-asc") out.sort((a,b)=>Number(a.price||0)-Number(b.price||0));
+  else if (sort === "price-desc") out.sort((a,b)=>Number(b.price||0)-Number(a.price||0));
+  else if (sort === "name") out.sort((a,b)=>String(a.name||"").localeCompare(String(b.name||"")));
+  // else featured: keep current order
 
-  const tagline = $("#taglineText");
-  if (tagline) tagline.textContent = APP.tagline;
+  return out;
 }
 
-async function initHome(){
-  await initCommon();
-  const products = await loadAllProducts();
-
-  // stats
-  const statCount = $("#statCount");
-  if (statCount) statCount.textContent = `${products.length} items`;
-  const statMode = $("#statMode");
-  if (statMode) statMode.textContent = `In-person / Email`;
-  const statSpeed = $("#statSpeed");
-  if (statSpeed) statSpeed.textContent = `By Order`;
-
-  // featured = first 3
-  const featured = products.slice(0,3);
-  const grid = $("#featuredGrid");
-  if (grid){
-    grid.innerHTML = featured.map(renderProductCard).join("");
-  }
-}
-
-async function initProductsPage(){
-  await initCommon();
-  const products = await loadAllProducts();
-
-  // build tag dropdown
-  const tags = uniqueTags(products);
-  const tagSel = $("#tagSelect");
-  if (tagSel){
-    tagSel.innerHTML = `<option value="all">All tags</option>` + tags.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
-  }
-
-  const state = {
-    q: "",
-    tag: "all",
-    sort: "featured",
-  };
-
-  const grid = $("#productsGrid");
-  const count = $("#resultsCount");
-
-  function render(){
-    const filtered = applyFiltersSort(products, state);
-    if (count) count.textContent = `${filtered.length} result${filtered.length===1?"":"s"}`;
-    if (grid) grid.innerHTML = filtered.map(renderProductCard).join("") || `<div class="notice">No products match your filters.</div>`;
-  }
-
-  const qInput = $("#searchInput");
-  if (qInput){
-    qInput.addEventListener("input", (e)=>{ state.q = e.target.value; render(); });
-  }
-
-  if (tagSel){
-    tagSel.addEventListener("change", (e)=>{ state.tag = e.target.value; render(); });
-  }
-
-  const sortSel = $("#sortSelect");
-  if (sortSel){
-    sortSel.addEventListener("change", (e)=>{ state.sort = e.target.value; render(); });
-  }
-
-  render();
-}
-
-async function initProductDetail(){
-  await initCommon();
-
-  const params = new URLSearchParams(location.search);
-  const slug = params.get("slug");
-  const wrap = $("#detailWrap");
-  if (!slug){
-    if (wrap) wrap.innerHTML = `<div class="notice">Missing product slug. Go back to <a href="products.html">Products</a>.</div>`;
-    return;
-  }
-
-  let product;
-  try{
-    product = await fetchJson(`products/${slug}/product.json`);
-    product.slug = slug;
-  }catch(err){
-    if (wrap) wrap.innerHTML = `<div class="notice">Couldn’t load this product. Go back to <a href="products.html">Products</a>.</div>`;
-    return;
-  }
-
-  const images = Array.isArray(product.images) ? product.images : [];
-  const tags = Array.isArray(product.optionalTags) ? product.optionalTags : [];
-  const videoFile = product.video || null; // optional: "video.mp4"
-
-  const imageUrls = images.map(f => `products/${slug}/images/${f}`);
-  const mainUrl = imageUrls[0] || null;
-
-  if (wrap){
-    wrap.innerHTML = `
-      <div class="breadcrumb"><a href="products.html">Products</a> / ${escapeHtml(product.name || slug)}</div>
-
-      <div class="detail">
-        <div class="card gallery">
-          <div class="main-image" id="mainImage">
-            ${mainUrl ? `<img src="${escapeHtml(mainUrl)}" alt="${escapeHtml(product.name)}">` : `<div class="notice">No images set in product.json</div>`}
-          </div>
-
-          ${imageUrls.length ? `
-            <div class="thumbs" id="thumbs">
-              ${imageUrls.map((u,i)=>`
-                <button class="${i===0?"active":""}" data-src="${escapeHtml(u)}" aria-label="View image ${i+1}">
-                  <img src="${escapeHtml(u)}" alt="" loading="lazy">
-                </button>
-              `).join("")}
-            </div>
-          ` : ""}
-
-          ${videoFile ? `
-            <div class="video-wrap">
-              <video controls preload="metadata">
-                <source src="products/${escapeHtml(slug)}/${escapeHtml(videoFile)}" type="video/mp4">
-                Sorry — your browser can’t play this video.
-              </video>
-            </div>
-          ` : ""}
+function renderCard(p){
+  const img = productPrimaryImage(p);
+  const tags = Array.isArray(p.optionalTags) ? p.optionalTags : [];
+  return `
+    <div class="card" data-slug="${escapeHtml(p.slug)}">
+      <div class="thumb">
+        ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(p.name)}" loading="lazy">` : ""}
+      </div>
+      <div class="body">
+        <div class="row">
+          <div class="n">${escapeHtml(p.name || "Untitled")}</div>
+          <div class="p">${escapeHtml(money(p.price))}</div>
         </div>
+        <div class="d">${escapeHtml(p.shortDescription || "")}</div>
+        ${tags.length ? `<div class="tags">${tags.slice(0,3).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join("")}</div>` : ""}
+      </div>
+    </div>
+  `;
+}
 
-        <div class="card detail-info">
-          <h2>${escapeHtml(product.name || "Untitled")}</h2>
-          <p class="price">${escapeHtml(money(product.price))} <span class="small">(display only)</span></p>
-          <p class="full">${escapeHtml(product.fullDescription || "")}</p>
+function openModal(html){
+  const modal = $("#modal");
+  const body = $("#modalBody");
+  if (!modal || !body) return;
+  body.innerHTML = html;
+  modal.setAttribute("aria-hidden","false");
+  document.body.style.overflow = "hidden";
+}
 
-          ${tags.length ? `<div class="tags">${tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join("")}</div>` : ""}
+function closeModal(){
+  const modal = $("#modal");
+  if (!modal) return;
+  modal.setAttribute("aria-hidden","true");
+  document.body.style.overflow = "";
+}
 
-          <div class="contact-box">
-            <strong>Interested?</strong>
-            <p class="small">Email me at: <a href="mailto:${encodeURIComponent(product.contactEmail || APP.contactEmail)}">${escapeHtml(product.contactEmail || APP.contactEmail)}</a></p>
-            <a class="btn primary" href="mailto:${encodeURIComponent(product.contactEmail || APP.contactEmail)}?subject=${encodeURIComponent("Purchase Inquiry: " + (product.name||slug))}">
-              Email about this
-            </a>
+function renderModal(p){
+  const images = Array.isArray(p.images) ? p.images : [];
+  const imageUrls = images.map(f => `products/${p.slug}/images/${f}`);
+  const main = imageUrls[0] || null;
+  const tags = Array.isArray(p.optionalTags) ? p.optionalTags : [];
+  const video = p.video ? `products/${p.slug}/${p.video}` : null;
+
+  const email = p.contactEmail || APP.contactEmail;
+  const subject = `Inquiry: ${p.name || p.slug}`;
+
+  return `
+    <div class="modal-grid">
+      <div>
+        <div class="big" id="bigImg">
+          ${main ? `<img src="${escapeHtml(main)}" alt="${escapeHtml(p.name)}">` : ""}
+        </div>
+        ${imageUrls.length ? `
+          <div class="thumbs" id="thumbs">
+            ${imageUrls.map((u,i)=>`
+              <button class="${i===0?"active":""}" data-src="${escapeHtml(u)}" aria-label="Image ${i+1}">
+                <img src="${escapeHtml(u)}" alt="" loading="lazy">
+              </button>
+            `).join("")}
+          </div>
+        ` : ""}
+        ${video ? `
+          <div class="video">
+            <video controls preload="metadata">
+              <source src="${escapeHtml(video)}" type="video/mp4">
+            </video>
+          </div>
+        ` : ""}
+      </div>
+
+      <div>
+        <div class="h2">${escapeHtml(p.name || "Untitled")}</div>
+        <div class="price">${escapeHtml(money(p.price))} <span class="muted">(display only)</span></div>
+        <div class="full">${escapeHtml(p.fullDescription || "")}</div>
+        ${tags.length ? `<div class="tags">${tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join("")}</div>` : ""}
+        <div style="margin-top:12px;">
+          <a class="btn" href="mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}">Email me</a>
+          <div class="muted" style="margin-top:8px; font-size:13px;">
+            Include the product name + any color/size notes.
           </div>
         </div>
       </div>
-    `;
-
-    // thumbnail click behavior
-    const thumbs = $("#thumbs");
-    const main = $("#mainImage");
-    if (thumbs && main){
-      thumbs.addEventListener("click", (e)=>{
-        const btn = e.target.closest("button[data-src]");
-        if (!btn) return;
-        $all("#thumbs button").forEach(b=>b.classList.remove("active"));
-        btn.classList.add("active");
-        const src = btn.getAttribute("data-src");
-        main.innerHTML = `<img src="${escapeHtml(src)}" alt="${escapeHtml(product.name)}">`;
-      });
-    }
-  }
+    </div>
+  `;
 }
 
-async function initContact(){
-  await initCommon();
-  const emailEl = $("#contactEmail");
-  if (emailEl) emailEl.textContent = APP.contactEmail;
-  const mailto = $("#mailtoLink");
-  if (mailto) mailto.setAttribute("href", `mailto:${encodeURIComponent(APP.contactEmail)}?subject=${encodeURIComponent("Purchase Inquiry")}`);
-}
-
-/* -------------------------
-   Router by page
-   ------------------------- */
 document.addEventListener("DOMContentLoaded", async () => {
-  const page = document.body.getAttribute("data-page");
   try{
-    if (page === "home") await initHome();
-    else if (page === "products") await initProductsPage();
-    else if (page === "product") await initProductDetail();
-    else if (page === "contact") await initContact();
-    else await initCommon();
+    // basic top text
+    $("#siteName").textContent = APP.siteName;
+    $("#siteTagline").textContent = APP.tagline;
+
+    // footer email
+    const footerLink = $("#footerEmailLink");
+    if (footerLink){
+      footerLink.textContent = APP.contactEmail;
+      footerLink.href = `mailto:${encodeURIComponent(APP.contactEmail)}?subject=${encodeURIComponent("Inquiry")}`;
+    }
+
+    // theme
+    initTheme();
+
+    // modal close handlers
+    $("#modal")?.addEventListener("click", (e)=>{
+      if (e.target?.dataset?.close === "true") closeModal();
+    });
+    document.addEventListener("keydown", (e)=>{
+      if (e.key === "Escape") closeModal();
+    });
+    $all("[data-close='true']").forEach(btn => btn.addEventListener("click", closeModal));
+
+    const products = await loadAllProducts();
+
+    // tag dropdown
+    const tagSel = $("#tagSelect");
+    const tags = uniqueTags(products);
+    tagSel.innerHTML = `<option value="all">All tags</option>` + tags.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+
+    const state = { q:"", tag:"all", sort:"featured" };
+    const grid = $("#productsGrid");
+    const count = $("#resultsCount");
+
+    function render(){
+      const filtered = applyFiltersSort(products, state);
+      count.textContent = `${filtered.length} item${filtered.length===1?"":"s"}`;
+      grid.innerHTML = filtered.map(renderCard).join("") || `<div class="muted">No matches.</div>`;
+    }
+
+    $("#searchInput").addEventListener("input", (e)=>{ state.q = e.target.value; render(); });
+    $("#tagSelect").addEventListener("change", (e)=>{ state.tag = e.target.value; render(); });
+    $("#sortSelect").addEventListener("change", (e)=>{ state.sort = e.target.value; render(); });
+
+    // click cards -> open modal
+    grid.addEventListener("click", (e)=>{
+      const card = e.target.closest(".card[data-slug]");
+      if (!card) return;
+      const slug = card.getAttribute("data-slug");
+      const p = products.find(x => x.slug === slug);
+      if (!p) return;
+
+      openModal(renderModal(p));
+
+      // thumbnail swapping inside modal
+      const thumbs = $("#thumbs");
+      const big = $("#bigImg");
+      if (thumbs && big){
+        thumbs.addEventListener("click", (ev)=>{
+          const btn = ev.target.closest("button[data-src]");
+          if (!btn) return;
+          $all("#thumbs button").forEach(b=>b.classList.remove("active"));
+          btn.classList.add("active");
+          const src = btn.getAttribute("data-src");
+          big.innerHTML = `<img src="${escapeHtml(src)}" alt="${escapeHtml(p.name)}">`;
+        }, { once:false });
+      }
+    });
+
+    render();
   }catch(err){
     console.error(err);
     const root = $("#pageError");
-    if (root) root.innerHTML = `<div class="notice">Something went wrong loading this page.</div>`;
+    if (root){
+      root.textContent = `Load error: ${err?.message || String(err)} (Tip: open via http(s), not file://)`;
+    }
   }
 });
-
-
-
