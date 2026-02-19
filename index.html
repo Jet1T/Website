@@ -1,526 +1,85 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Scoreboard</title>
-  <style>
-    :root{
-      --bg1:#070A12;
-      --bg2:#0B1024;
-      --card: rgba(255,255,255,.06);
-      --card2: rgba(255,255,255,.10);
-      --text:#EAF0FF;
-      --muted: rgba(234,240,255,.7);
-      --line: rgba(234,240,255,.12);
-      --shadow: 0 18px 50px rgba(0,0,0,.55);
-      --radius: 22px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-    }
-
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      font-family: var(--sans);
-      color: var(--text);
-      background:
-        radial-gradient(1100px 700px at 15% 20%, rgba(122,162,255,.18), transparent 55%),
-        radial-gradient(900px 600px at 85% 30%, rgba(167,255,218,.12), transparent 55%),
-        radial-gradient(800px 600px at 60% 90%, rgba(255,122,122,.08), transparent 55%),
-        linear-gradient(180deg, var(--bg1), var(--bg2));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-    }
-
-    .wrap{
-      width:min(1100px, 100%);
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-    }
-
-    .topbar{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-      padding:12px 14px;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: var(--card);
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow);
-    }
-
-    .brand{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      min-width: 220px;
-    }
-    .brand .title{
-      font-weight:700;
-      letter-spacing:.2px;
-      font-size:14px;
-      opacity:.95;
-    }
-    .brand .hint{
-      font-size:12px;
-      color: var(--muted);
-    }
-
-    .top-controls{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    .btn{
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.08);
-      color: var(--text);
-      padding:10px 12px;
-      border-radius: 14px;
-      font-weight:650;
-      cursor:pointer;
-      transition: transform .08s ease, background .15s ease, border-color .15s ease;
-      user-select:none;
-      white-space:nowrap;
-    }
-    .btn:hover{ background: rgba(255,255,255,.12); border-color: rgba(234,240,255,.22); }
-    .btn:active{ transform: translateY(1px) scale(.99); }
-    .btn.danger{ background: rgba(255,122,122,.12); border-color: rgba(255,122,122,.25); }
-    .btn.danger:hover{ background: rgba(255,122,122,.18); border-color: rgba(255,122,122,.35); }
-
-    .pill{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 12px;
-      border:1px solid var(--line);
-      border-radius: 14px;
-      background: rgba(255,255,255,.06);
-    }
-    .pill label{
-      font-size:12px;
-      color: var(--muted);
-      font-weight:650;
-      letter-spacing:.15px;
-    }
-    .pill input{
-      width:64px;
-      font-family: var(--mono);
-      font-size:13px;
-      color: var(--text);
-      background: transparent;
-      border: none;
-      outline: none;
-      text-align:center;
-    }
-    .pill input::-webkit-outer-spin-button,
-    .pill input::-webkit-inner-spin-button{ -webkit-appearance: none; margin:0; }
-    .pill input[type=number]{ -moz-appearance:textfield; }
-
-    .board{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:14px;
-    }
-
-    .side{
-      position:relative;
-      overflow:hidden;
-      border-radius: var(--radius);
-      border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
-      backdrop-filter: blur(12px);
-      box-shadow: var(--shadow);
-      min-height: 420px;
-      padding: 18px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-    }
-
-    .side:before{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      background:
-        radial-gradient(520px 220px at 30% 10%, rgba(122,162,255,.16), transparent 50%),
-        radial-gradient(520px 220px at 70% 90%, rgba(167,255,218,.10), transparent 55%);
-      pointer-events:none;
-      filter:saturate(120%);
-    }
-
-    .header{
-      position:relative;
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-    }
-
-    .name{
-      position:relative;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      width:100%;
-    }
-
-    .name input{
-      width:100%;
-      font-size:16px;
-      font-weight:800;
-      color: var(--text);
-      background: rgba(255,255,255,.06);
-      border:1px solid var(--line);
-      border-radius: 14px;
-      padding:10px 12px;
-      outline:none;
-      transition: border-color .15s ease, background .15s ease;
-    }
-    .name input:focus{
-      border-color: rgba(234,240,255,.25);
-      background: rgba(255,255,255,.09);
-    }
-
-    .tag{
-      position:relative;
-      font-size:12px;
-      color: var(--muted);
-      font-family: var(--mono);
-      opacity:.95;
-    }
-
-    .score{
-      position:relative;
-      text-align:center;
-      font-family: var(--mono);
-      font-weight:900;
-      font-size: clamp(86px, 13vw, 160px);
-      line-height: 1;
-      letter-spacing: -2px;
-      margin: 10px 0 6px;
-      text-shadow: 0 12px 40px rgba(0,0,0,.45);
-    }
-
-    .winner{
-      animation: pop .16s ease-out;
-      filter: drop-shadow(0 16px 38px rgba(167,255,218,.18));
-    }
-    @keyframes pop{
-      from{ transform: scale(.98); opacity:.85; }
-      to{ transform: scale(1); opacity:1; }
-    }
-
-    .controls{
-      position:relative;
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-      margin-top: 8px;
-    }
-
-    .bigbtn{
-      border-radius: 18px;
-      padding: 16px 14px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.08);
-      color: var(--text);
-      cursor:pointer;
-      transition: transform .08s ease, background .15s ease, border-color .15s ease;
-      font-weight:900;
-      font-size: 22px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      user-select:none;
-    }
-    .bigbtn:hover{ background: rgba(255,255,255,.12); border-color: rgba(234,240,255,.22); }
-    .bigbtn:active{ transform: translateY(1px) scale(.99); }
-
-    .bigbtn.minus{
-      background: rgba(255,255,255,.06);
-    }
-
-    .footer-note{
-      position:relative;
-      margin-top: 10px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      color: var(--muted);
-      font-size: 12px;
-      font-family: var(--mono);
-    }
-
-    .toast{
-      position:fixed;
-      left:50%;
-      bottom:18px;
-      transform: translateX(-50%);
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(234,240,255,.16);
-      border-radius: 999px;
-      padding: 10px 14px;
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow);
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--text);
-      opacity:0;
-      pointer-events:none;
-      transition: opacity .18s ease, transform .18s ease;
-    }
-    .toast.show{
-      opacity:1;
-      transform: translateX(-50%) translateY(-4px);
-    }
-
-    @media (max-width: 850px){
-      .board{ grid-template-columns: 1fr; }
-      .side{ min-height: 360px; }
-      .brand{ min-width: 0; }
-    }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MSS | Home</title>
+  <link rel="stylesheet" href="assets/styles.css" />
 </head>
-<body>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="brand">
-        <div class="title">Scoreboard</div>
-        <div class="hint">Keys: <b>A</b>/<b>Z</b> (left +/−), <b>K</b>/<b>M</b> (right +/−), <b>R</b> reset</div>
-      </div>
+<body data-page="home">
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html" aria-label="Home">
+        <span class="brand-badge" aria-hidden="true"></span>
+        <span id="brandText">Mac Short Solutions</span>
+      </a>
 
-      <div class="top-controls">
-        <div class="pill" title="First to this score gets highlighted (optional)">
-          <label for="winTo">PLAY TO</label>
-          <input id="winTo" type="number" min="1" step="1" value="11" />
-        </div>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+      </nav>
 
-        <button class="btn" id="swapBtn" title="Swap sides">Swap</button>
-        <button class="btn danger" id="resetBtn" title="Reset scores">Reset</button>
+      <div class="nav-actions">
+        <button class="pill" id="themeToggle" type="button">☀ Light</button>
       </div>
     </div>
+  </header>
 
-    <div class="board" id="board">
-      <!-- LEFT -->
-      <section class="side" data-side="left">
-        <div>
-          <div class="header">
-            <div class="name">
-              <input id="nameLeft" type="text" value="Left" maxlength="24" aria-label="Left player name">
-              <div class="tag">LEFT SIDE</div>
-            </div>
-          </div>
+  <main class="container">
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="card hero-left">
+          <div class="kicker"><span class="dot"></span><span id="taglineText">About MSS</span></div>
+          <h1>One Cadet to Another</h1>
+          <p class="sub">
 
-          <div class="score" id="scoreLeft" aria-live="polite">0</div>
-
-          <div class="controls">
-            <button class="bigbtn plus" id="plusLeft" aria-label="Left plus one">+ <span style="opacity:.7;font-weight:800;">1</span></button>
-            <button class="bigbtn minus" id="minusLeft" aria-label="Left minus one">− <span style="opacity:.7;font-weight:800;">1</span></button>
+            Browse the solutions I have already found or designed. To buy something, shoot me an email with what you'd like. Feel free to make product suggestions as well.
+          </p>
+          <div class="cta-row">
+            <a class="btn primary" href="products.html">View Products</a>
           </div>
         </div>
 
-        <div class="footer-note">
-          <span>Tap buttons or use keyboard</span>
-          <span id="statusLeft"></span>
-        </div>
-      </section>
-
-      <!-- RIGHT -->
-      <section class="side" data-side="right">
-        <div>
-          <div class="header">
-            <div class="name">
-              <input id="nameRight" type="text" value="Right" maxlength="24" aria-label="Right player name">
-              <div class="tag">RIGHT SIDE</div>
-            </div>
-          </div>
-
-          <div class="score" id="scoreRight" aria-live="polite">0</div>
-
-          <div class="controls">
-            <button class="bigbtn plus" id="plusRight" aria-label="Right plus one">+ <span style="opacity:.7;font-weight:800;">1</span></button>
-            <button class="bigbtn minus" id="minusRight" aria-label="Right minus one">− <span style="opacity:.7;font-weight:800;">1</span></button>
+        <div class="card hero-right">
+          <div class="stat"><strong>Catalog</strong><span id="statCount">—</span></div>
+          <div class="stat"><strong>Purchases</strong><span id="statMode">—</span></div>
+          <div class="stat"><strong>Hosting</strong><span id="statSpeed">—</span></div>
+          <div class="notice">
+            <strong>How this works:</strong>
+            <div class="small">Products are loaded from <code>products/products.json</code> + each folder’s <code>product.json</code>.</div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <div class="footer-note">
-          <span>Clean & readable from far away</span>
-          <span id="statusRight"></span>
-        </div>
-      </section>
+    <section class="section">
+      <h2>Featured</h2>
+      <p class="lead">First three products in your catalog.</p>
+      <div id="featuredGrid" class="grid"></div>
+      <div id="pageError" style="margin-top:14px;"></div>
+    </section>
+  </main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="small">
+      To purchase: email <a href="mailto:MacShortSolutions@gmail.com">MacShortSolutions@gmail.com</a> with the product name.
+      <span style="opacity:.7">No checkout — in-person handoff.</span>
+    </div>
+    <div class="mini-links">
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
     </div>
   </div>
+</footer>
 
-  <div class="toast" id="toast">Reset.</div>
-
+  <script src="assets/app.js"></script>
   <script>
-    // ---------- State ----------
-    const els = {
-      winTo: document.getElementById('winTo'),
-      reset: document.getElementById('resetBtn'),
-      swap: document.getElementById('swapBtn'),
-      board: document.getElementById('board'),
-      toast: document.getElementById('toast'),
-
-      nameL: document.getElementById('nameLeft'),
-      nameR: document.getElementById('nameRight'),
-
-      scoreL: document.getElementById('scoreLeft'),
-      scoreR: document.getElementById('scoreRight'),
-
-      plusL: document.getElementById('plusLeft'),
-      minusL: document.getElementById('minusLeft'),
-      plusR: document.getElementById('plusRight'),
-      minusR: document.getElementById('minusRight'),
-
-      statusL: document.getElementById('statusLeft'),
-      statusR: document.getElementById('statusRight'),
-    };
-
-    const STORAGE_KEY = "scoreboard_v1";
-
-    const state = {
-      left: 0,
-      right: 0,
-      nameLeft: "Left",
-      nameRight: "Right",
-      winTo: 11,
-      swapped: false
-    };
-
-    function clamp(n, min, max){ return Math.min(max, Math.max(min, n)); }
-
-    function showToast(msg){
-      els.toast.textContent = msg;
-      els.toast.classList.add('show');
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => els.toast.classList.remove('show'), 900);
-    }
-
-    function save(){
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
-    }
-
-    function load(){
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if(!raw) return;
-        const parsed = JSON.parse(raw);
-        Object.assign(state, parsed);
-      } catch {}
-    }
-
-    function getWinTo(){
-      const v = parseInt(els.winTo.value, 10);
-      return Number.isFinite(v) ? clamp(v, 1, 999) : 11;
-    }
-
-    function render(){
-      els.nameL.value = state.nameLeft;
-      els.nameR.value = state.nameRight;
-
-      els.winTo.value = state.winTo;
-
-      els.scoreL.textContent = state.left;
-      els.scoreR.textContent = state.right;
-
-      // winner highlight
-      const winTo = state.winTo;
-      const lWin = state.left >= winTo && state.left > state.right;
-      const rWin = state.right >= winTo && state.right > state.left;
-
-      els.scoreL.classList.toggle('winner', lWin);
-      els.scoreR.classList.toggle('winner', rWin);
-
-      els.statusL.textContent = lWin ? "WIN" : "";
-      els.statusR.textContent = rWin ? "WIN" : "";
-
-      save();
-    }
-
-    function bump(side, delta){
-      state[side] = clamp(state[side] + delta, 0, 999);
-      render();
-    }
-
-    function reset(){
-      state.left = 0;
-      state.right = 0;
-      render();
-      showToast("Reset.");
-    }
-
-    function swapSides(){
-      // swap names and scores
-      [state.left, state.right] = [state.right, state.left];
-      [state.nameLeft, state.nameRight] = [state.nameRight, state.nameLeft];
-
-      // swap UI positions by swapping DOM nodes
-      const children = Array.from(els.board.children);
-      if(children.length === 2){
-        els.board.insertBefore(children[1], children[0]);
-      }
-      state.swapped = !state.swapped;
-      render();
-      showToast("Swapped sides.");
-    }
-
-    // ---------- Wiring ----------
-    load();
-
-    // If previously swapped, swap DOM on load to match
-    if(state.swapped){
-      const children = Array.from(els.board.children);
-      if(children.length === 2){
-        els.board.insertBefore(children[1], children[0]);
-      }
-    }
-
-    render();
-
-    els.plusL.addEventListener('click', () => bump('left', +1));
-    els.minusL.addEventListener('click', () => bump('left', -1));
-    els.plusR.addEventListener('click', () => bump('right', +1));
-    els.minusR.addEventListener('click', () => bump('right', -1));
-
-    els.reset.addEventListener('click', reset);
-    els.swap.addEventListener('click', swapSides);
-
-    els.nameL.addEventListener('input', (e) => { state.nameLeft = e.target.value || "Left"; save(); });
-    els.nameR.addEventListener('input', (e) => { state.nameRight = e.target.value || "Right"; save(); });
-
-    els.winTo.addEventListener('change', () => {
-      state.winTo = getWinTo();
-      render();
-      showToast("Play to " + state.winTo);
-    });
-
-    // Keyboard shortcuts (ignore when typing in inputs)
-    window.addEventListener('keydown', (e) => {
-      const tag = (document.activeElement && document.activeElement.tagName) || "";
-      if(tag === "INPUT" || tag === "TEXTAREA") return;
-
-      const k = e.key.toLowerCase();
-
-      if(k === 'a') bump('left', +1);
-      else if(k === 'z') bump('left', -1);
-      else if(k === 'k') bump('right', +1);
-      else if(k === 'm') bump('right', -1);
-      else if(k === 'r') reset();
-      else if(k === 's') swapSides();
+    // tiny extra: mirror brand name in footer if desired
+    document.addEventListener("DOMContentLoaded", () => {
+      const b = document.querySelector("#brandText")?.textContent || "Mac Short Solutions";
+      const b2 = document.querySelector("#brandText2");
+      if (b2) b2.textContent = b;
     });
   </script>
 </body>

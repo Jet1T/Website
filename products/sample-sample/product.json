@@ -1,0 +1,10 @@
+{
+  "name": "Custom Sample",
+  "price": 5,
+  "shortDescription": "Lightweight keychain with your text or icon.",
+  "fullDescription": "A simple, clean keychain print. Pick your color, add your name, and I’ll print it. Great for backpacks, keys, or gifts.",
+  "contactEmail": "you@example.com",
+  "optionalTags": ["Keychain", "Custom", "Fast"],
+  "images": ["1.svg", "2.svg"],
+  "created": "2026-02-01"
+}

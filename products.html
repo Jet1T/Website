@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MSS | Products</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="products">
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html" aria-label="Home">
+        <span class="brand-badge" aria-hidden="true"></span>
+        <span id="brandText">Your Shop Name</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="pill" id="themeToggle" type="button">☀ Light</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container section">
+    <h2>Products</h2>
+    <p class="lead">Search, filter, and sort. Click any item to view details.</p>
+
+    <div class="card toolbar">
+      <div class="tools-left">
+        <div class="field">
+          <span aria-hidden="true">🔎</span>
+          <input id="searchInput" type="text" placeholder="Search by name (or tag)..." />
+        </div>
+
+        <div class="field">
+          <span class="small">Tag</span>
+          <select id="tagSelect" aria-label="Filter by tag"></select>
+        </div>
+      </div>
+
+      <div class="tools-right">
+        <div class="field">
+          <span class="small">Sort</span>
+          <select id="sortSelect" aria-label="Sort products">
+            <option value="featured">Featured</option>
+            <option value="price-asc">Price (low → high)</option>
+            <option value="price-desc">Price (high → low)</option>
+            <option value="name">Name (A → Z)</option>
+          </select>
+        </div>
+
+        <div class="pill" aria-live="polite"><span id="resultsCount">—</span></div>
+      </div>
+    </div>
+
+    <div id="productsGrid" class="grid"></div>
+    <div id="pageError" style="margin-top:14px;"></div>
+  </main>
+
+  <footer class="footer">
+  <div class="container footer-inner">
+    <div class="small">
+      To purchase: email <a href="mailto:MacShortSolutions@gmail.com">MacShortSolutions@gmail.com</a> with the product name.
+      <span style="opacity:.7">No checkout — in-person handoff.</span>
+    </div>
+    <div class="mini-links">
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+    </div>
+  </div>
+</footer>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
