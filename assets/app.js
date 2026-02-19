@@ -181,7 +181,7 @@ async function initHome(){
   const statMode = $("#statMode");
   if (statMode) statMode.textContent = `In-person / Email`;
   const statSpeed = $("#statSpeed");
-  if (statSpeed) statSpeed.textContent = `Fast static site`;
+  if (statSpeed) statSpeed.textContent = `By Order`;
 
   // featured = first 3
   const featured = products.slice(0,3);
@@ -350,4 +350,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (root) root.innerHTML = `<div class="notice">Something went wrong loading this page.</div>`;
   }
 });
+
 
