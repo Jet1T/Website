@@ -301,7 +301,7 @@ async function initProductDetail(){
           <div class="contact-box">
             <strong>Interested?</strong>
             <p class="small">Email me at: <a href="mailto:${encodeURIComponent(product.contactEmail || APP.contactEmail)}">${escapeHtml(product.contactEmail || APP.contactEmail)}</a></p>
-            <a class="btn primary" href="mailto:${encodeURIComponent(product.contactEmail || APP.contactEmail)}?subject=${encodeURIComponent("3D Print Inquiry: " + (product.name||slug))}">
+            <a class="btn primary" href="mailto:${encodeURIComponent(product.contactEmail || APP.contactEmail)}?subject=${encodeURIComponent("Purchase Inquiry: " + (product.name||slug))}">
               Email about this
             </a>
           </div>
@@ -330,7 +330,7 @@ async function initContact(){
   const emailEl = $("#contactEmail");
   if (emailEl) emailEl.textContent = APP.contactEmail;
   const mailto = $("#mailtoLink");
-  if (mailto) mailto.setAttribute("href", `mailto:${encodeURIComponent(APP.contactEmail)}?subject=${encodeURIComponent("3D Print Inquiry")}`);
+  if (mailto) mailto.setAttribute("href", `mailto:${encodeURIComponent(APP.contactEmail)}?subject=${encodeURIComponent("Purchase Inquiry")}`);
 }
 
 /* -------------------------
@@ -350,5 +350,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (root) root.innerHTML = `<div class="notice">Something went wrong loading this page.</div>`;
   }
 });
+
 
 
