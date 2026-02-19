@@ -36,6 +36,11 @@ a{color:inherit}
   backdrop-filter: blur(10px);
 }
 
+main.container{
+  padding-top: 10px;
+}
+
+
 .top-row{
   display:flex; align-items:center; justify-content:space-between;
   padding:14px 0 10px;
@@ -227,5 +232,6 @@ a{color:inherit}
   overflow:hidden;
 }
 .video video{width:100%; display:block;}
+
 
 
