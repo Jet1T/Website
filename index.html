@@ -1,65 +1,31 @@
-<!doctype html>
-<html lang="en" data-theme="dark">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MSS - Store</title>
-  <link rel="stylesheet" href="assets/styles.css" />
+<meta charset="UTF-8">
+<title>Video</title>
+
+<style>
+body {
+    margin: 0;
+    background: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+video {
+    max-width: 100%;
+    max-height: 100%;
+}
+</style>
+
 </head>
 <body>
-  <header class="top">
-    <div class="container">
-      <div class="top-row">
-        <div class="title">
-          <img src="assets/logo.png" class="logo" alt="MSS Logo">
-          <div>
-            <div class="name" id="siteName">Mac Short Solutions</div>
-            <div class="sub" id="siteTagline">Not affiliated with USMA or DoW</div>
-          </div>
-        </div>
 
-        <button class="toggle" id="themeToggle" type="button" aria-label="Toggle theme">☾</button>
-      </div>
+<video controls autoplay loop>
+    <source src="IMG_6723.MOV" type="video/quicktime">
+    Your browser does not support the video tag.
+</video>
 
-      <div class="controls">
-        <input id="searchInput" class="search" placeholder="Search (name or tag)..." />
-        <select id="tagSelect" class="select" aria-label="Filter by tag"></select>
-        <select id="sortSelect" class="select" aria-label="Sort">
-          <option value="featured">Sort: featured</option>
-          <option value="price-asc">Price: low → high</option>
-          <option value="price-desc">Price: high → low</option>
-          <option value="name">Name: A → Z</option>
-        </select>
-        <div class="count" id="resultsCount">—</div>
-      </div>
-    </div>
-  </header>
-
-  <main class="container">
-    <div id="productsGrid" class="grid"></div>
-    <div id="pageError" class="error"></div>
-  </main>
-
-  <!-- Simple modal -->
-  <div class="modal" id="modal" aria-hidden="true">
-    <div class="modal-backdrop" data-close="true"></div>
-    <div class="modal-card" role="dialog" aria-modal="true">
-      <button class="modal-x" data-close="true" aria-label="Close">✕</button>
-      <div id="modalBody"></div>
-    </div>
-  </div>
-
-  <footer class="footer">
-    <div class="container foot">
-      <div>
-        For buying, product suggestions, and hate mail: email <a id="footerEmailLink" href="#">—</a>.
-      </div>
-      <div class="muted" id="footerNote">MSS</div>
-    </div>
-  </footer>
-
-  <script src="assets/app.js"></script>
 </body>
 </html>
-
-
