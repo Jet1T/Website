@@ -1,0 +1,218 @@
+/* ==========================================================
+   The Days — Countdown Site
+   Palette: Black / Gray / Gold, in the spirit of the Academy's
+   own colors. Laid out like a duty roster: hairline rules,
+   numbered entries, tabular figures. No rounded gradients,
+   no drop shadows doing the heavy lifting.
+   ========================================================== */
+
+:root {
+  --black:        #0a0b0c;
+  --charcoal:      #131416;
+  --line:          #2c2e32;
+  --line-strong:   #3d4045;
+  --gray:          #9a9fa6;
+  --gray-dim:      #6c7076;
+  --paper:         #e9e7e1;
+  --gold:          #b3925a;
+  --gold-bright:   #d8b978;
+
+  --font-display: "Oswald", "Arial Narrow", sans-serif;
+  --font-body:    "Public Sans", -apple-system, "Segoe UI", sans-serif;
+  --font-mono:    "JetBrains Mono", "Courier New", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--black);
+  color: var(--paper);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 56px 20px 40px;
+  line-height: 1.5;
+}
+
+.frame {
+  width: 100%;
+  max-width: 640px;
+}
+
+/* ---------- Masthead ---------- */
+
+.masthead {
+  text-align: center;
+  margin-bottom: 44px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.masthead h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 2.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--paper);
+}
+
+.tagline {
+  margin: 10px 0 0;
+  font-size: 0.92rem;
+  color: var(--gray);
+}
+
+/* ---------- Ledger (uniform event list) ---------- */
+
+.ledger {
+  margin-bottom: 40px;
+}
+
+.ledger-rule {
+  border-top: 3px double var(--gold);
+}
+
+.event-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  column-gap: 16px;
+  padding: 26px 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.entry:last-child {
+  border-bottom: none;
+}
+
+.entry-no {
+  margin: 0;
+  padding-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--gray-dim);
+}
+
+.entry-body {
+  min-width: 0;
+}
+
+.entry-sentence {
+  margin: 0;
+  font-size: 1.3rem;
+  line-height: 1.5;
+  color: var(--paper);
+  font-weight: 400;
+}
+
+.entry-sentence .entry-count {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.7rem;
+  color: var(--gold-bright);
+  font-variant-numeric: tabular-nums;
+  padding: 0 2px;
+}
+
+.entry-sentence strong {
+  font-weight: 600;
+  color: var(--gold-bright);
+}
+
+.entry-date {
+  margin: 10px 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--gray-dim);
+}
+
+/* ---------- Empty state ---------- */
+
+.empty-message {
+  text-align: center;
+  color: var(--gray);
+  font-size: 0.95rem;
+  padding: 30px 0;
+}
+
+.empty-message code {
+  background: var(--charcoal);
+  border: 1px solid var(--line);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+/* ---------- Footer ---------- */
+
+.masthead-footer {
+  margin-top: 40px;
+  text-align: center;
+  color: var(--gray-dim);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 560px) {
+  body {
+    padding: 40px 16px 32px;
+  }
+
+  .masthead h1 {
+    font-size: 2.1rem;
+  }
+
+  .entry-sentence {
+    font-size: 1.05rem;
+  }
+
+  .entry-sentence .entry-count {
+    font-size: 1.35rem;
+  }
+
+  .entry {
+    grid-template-columns: 28px 1fr;
+    column-gap: 10px;
+    padding: 20px 4px;
+  }
+}
+
+/* ---------- Accessibility ---------- */
+
+:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

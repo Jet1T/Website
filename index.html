@@ -1,31 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Video</title>
-
-<style>
-body {
-    margin: 0;
-    background: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-video {
-    max-width: 100%;
-    max-height: 100%;
-}
-</style>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Days</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Oswald:wght@400;500;600;700&family=Public+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<video controls autoplay loop>
-    <source src="IMG_6723.MOV" type="video/quicktime">
-    Your browser does not support the video tag.
-</video>
+  <div class="frame">
 
+    <header class="masthead">
+      <p class="eyebrow">Corps of Cadets &middot; Unofficial</p>
+      <h1>The Days</h1>
+      <p class="tagline">A running count of what's coming next</p>
+    </header>
+
+    <!-- Full list of upcoming events, nearest first, each rendered
+         at the same size. Populated automatically by script.js -->
+    <section class="ledger">
+      <div class="ledger-rule"></div>
+
+      <div id="event-list" class="event-list">
+        <!-- entries injected here -->
+      </div>
+
+      <div class="ledger-rule"></div>
+    </section>
+
+    <p id="empty-message" class="empty-message" hidden>
+      No entries on the roster. Add one in <code>script.js</code>.
+    </p>
+
+    <footer class="masthead-footer">
+      <p>Recalculated on every visit &middot; no entries removed by hand</p>
+    </footer>
+
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
