@@ -100,9 +100,26 @@ function getUpcomingEvents() {
 }
 
 /**
+ * Writes today's date into the "Today is Month Day, Year!" line
+ * under the masthead. Runs on every page load, so it always
+ * reflects the visitor's current date automatically.
+ */
+function renderTodayLine() {
+  const todayEl = document.getElementById("today-date");
+  const formatted = new Date().toLocaleDateString(undefined, {
+    month: "long",
+    day: "numeric",
+    year: "numeric"
+  });
+  todayEl.textContent = `Today is ${formatted}!`;
+}
+
+/**
  * Renders one uniform-size entry per upcoming event, nearest first.
  */
 function renderEvents() {
+  renderTodayLine();
+
   const listEl = document.getElementById("event-list");
   const ledgerEl = document.querySelector(".ledger");
   const emptyMessageEl = document.getElementById("empty-message");
