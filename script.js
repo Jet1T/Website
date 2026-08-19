@@ -29,7 +29,7 @@ const events = [
   },
   {
     name: "500th Night",
-    date: "2026-01-23"
+    date: "2027-01-23"
   },
   {
     name: "100th Night",
