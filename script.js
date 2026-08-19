@@ -20,11 +20,11 @@
    ---------------------------------------------------------- */
 const events = [
   {
-    name: "Thanksgiving Break",
+    name: "Thanksgiving Leave",
     date: "2026-11-25"
   },
   {
-    name: "Christmas Leave",
+    name: "Winter Leave",
     date: "2026-12-20"
   },
   {
