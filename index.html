@@ -1,11 +1,114 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Days website retired</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#87c4ee">
+<title>Plane Hunter</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+  body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#88c5ec;color:#17354b}
+  canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+  .hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:start;gap:12px;padding:calc(18px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) 0 calc(20px + env(safe-area-inset-left));pointer-events:none;user-select:none}
+  .brand{font-weight:900;font-size:clamp(18px,3.2vw,26px);letter-spacing:.13em;text-shadow:0 2px 10px #fff9}
+  .hint{font-size:clamp(11px,2.5vw,14px);font-weight:600;opacity:.78;margin-top:4px}
+  .score{background:#ffffffb8;border:1px solid #ffffffdd;border-radius:15px;padding:10px 18px;text-align:center;box-shadow:0 5px 22px #396b8a22;min-width:90px;backdrop-filter:blur(8px)}
+  .score span{display:block;font-size:11px;letter-spacing:.15em;font-weight:800;opacity:.65}
+  .score strong{display:block;font-size:29px;line-height:1.2;font-variant-numeric:tabular-nums}
+  .toast{position:fixed;left:50%;bottom:calc(35px + env(safe-area-inset-bottom));transform:translateX(-50%);padding:10px 18px;border-radius:30px;background:#163b57bd;color:white;font-weight:700;letter-spacing:.04em;text-align:center;white-space:nowrap;pointer-events:none;transition:opacity .3s;opacity:0}
+  .toast.visible{opacity:1}
+  @media(max-width:500px){.hud{padding-top:calc(12px + env(safe-area-inset-top));padding-left:14px;padding-right:14px}.score{padding:8px 13px;min-width:74px}.score strong{font-size:25px}}
+</style>
 </head>
 <body>
-  The Days website retired
+<canvas id="sky" aria-label="Animated airplane shooting game. Tap or click the airplane to shoot it down."></canvas>
+<div class="hud"><div><div class="brand">PLANE HUNTER</div><div class="hint">Tap or click the plane to shoot it down</div></div><div class="score"><span>HITS</span><strong id="hits">0</strong></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite">DIRECT HIT!</div>
+<script>
+(() => {
+  'use strict';
+  const canvas=document.getElementById('sky'),ctx=canvas.getContext('2d');
+  const hitsEl=document.getElementById('hits'),toast=document.getElementById('toast');
+  let w=0,h=0,dpr=1,last=0,elapsed=0,hits=0,plane,clouds=[],particles=[],rings=[],shots=[],respawn=0,toastUntil=0;
+  const rand=(a,b)=>a+Math.random()*(b-a);
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  function resize(){
+    w=innerWidth;h=innerHeight;dpr=Math.min(devicePixelRatio||1,2);
+    canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    if(plane){plane.x=clamp(plane.x,70,w-70);plane.y=clamp(plane.y,105,h-65)}
+    clouds=Array.from({length:8},(_,i)=>({x:rand(-100,w+150),y:rand(90,h*.8),s:rand(.6,1.8),speed:rand(4,13),alpha:rand(.20,.46)}));
+  }
+  function spawn(){
+    const scale=clamp(Math.min(w/750,h/650),.72,1.45);
+    const dir=Math.random()<.5?1:-1;
+    plane={x:dir===1?-110:w+110,y:rand(Math.max(135,h*.19),Math.max(170,h*.68)),vx:dir*rand(95,145),vy:rand(-22,22),angle:0,scale,life:0,phase:rand(0,6.28),alive:true};
+  }
+  function puff(x,y,n=20){
+    for(let i=0;i<n;i++)particles.push({x,y,vx:rand(-165,165),vy:rand(-175,80),r:rand(2,9),life:rand(.45,1.2),max:1.2,color:Math.random()<.55?'#ffae36':Math.random()<.7?'#f46b32':'#435969'});
+  }
+  function fire(x,y){
+    if(!plane||!plane.alive)return;
+    plane.alive=false;respawn=1.5;hits++;hitsEl.textContent=hits;
+    puff(x,y,43);rings.push({x,y,r:8,life:.5});toast.classList.add('visible');toastUntil=elapsed+1.1;
+  }
+  function drawCloud(c){
+    ctx.save();ctx.translate(c.x,c.y);ctx.scale(c.s,c.s);ctx.globalAlpha=c.alpha;ctx.fillStyle='#fff';
+    for(const [x,y,r] of [[0,0,27],[30,-13,34],[65,-3,29],[35,11,34],[-25,12,20]]){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+    ctx.restore();
+  }
+  function planeShape(){
+    // A simple stylized single-engine aircraft, nose pointing toward +X.
+    ctx.lineJoin='round';ctx.lineCap='round';ctx.lineWidth=3;ctx.strokeStyle='#23394a';
+    ctx.fillStyle='#dce7ea';
+    ctx.beginPath();ctx.moveTo(58,0);ctx.lineTo(32,-10);ctx.lineTo(-42,-10);ctx.lineTo(-53,-17);ctx.lineTo(-64,-15);ctx.lineTo(-58,-1);ctx.lineTo(-62,7);ctx.lineTo(-42,10);ctx.lineTo(31,10);ctx.closePath();ctx.fill();ctx.stroke();
+    // Tail and wings
+    ctx.fillStyle='#547c93';
+    ctx.beginPath();ctx.moveTo(-37,-4);ctx.lineTo(-62,-36);ctx.lineTo(-46,-36);ctx.lineTo(-13,-5);ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.fillStyle='#6b9cb2';ctx.beginPath();ctx.moveTo(4,-6);ctx.lineTo(-24,-45);ctx.lineTo(5,-45);ctx.lineTo(35,-5);ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.fillStyle='#40728d';ctx.beginPath();ctx.moveTo(6,5);ctx.lineTo(-20,34);ctx.lineTo(5,34);ctx.lineTo(35,5);ctx.closePath();ctx.fill();ctx.stroke();
+    // Cockpit
+    ctx.fillStyle='#23475c';ctx.beginPath();ctx.moveTo(8,-10);ctx.quadraticCurveTo(18,-27,33,-9);ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.strokeStyle='#ffffffa8';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(17,-14);ctx.lineTo(25,-15);ctx.stroke();
+    // Rotating propeller blur
+    ctx.strokeStyle='#223b4c88';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(58,0,3,26,0,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='#ffdb86';ctx.beginPath();ctx.arc(59,0,3.5,0,Math.PI*2);ctx.fill();
+  }
+  function render(t){
+    const dt=Math.min((t-last)/1000||0,.04);last=t;elapsed+=dt;
+    const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#67b1e3');g.addColorStop(.68,'#a5d8f1');g.addColorStop(1,'#e2f3f9');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+    ctx.fillStyle='#ffffff2a';ctx.beginPath();ctx.arc(w*.8,h*.17,Math.min(w,h)*.11,0,Math.PI*2);ctx.fill();
+    for(const c of clouds){c.x+=c.speed*dt;if(c.x-160*c.s>w)c.x=-170*c.s;drawCloud(c)}
+    if(plane?.alive){
+      const p=plane;p.life+=dt;
+      p.vy+=Math.sin(elapsed*.78+p.phase)*28*dt;
+      p.vy=clamp(p.vy,-43,43);p.x+=p.vx*dt;p.y+=p.vy*dt;
+      if(p.x>(w+130)||p.x<(-130)){const dir=p.vx>0?-1:1;p.vx=dir*rand(95,145);p.x=clamp(p.x,-85,w+85);p.y=rand(Math.max(135,h*.19),Math.max(170,h*.7))}
+      const upper=Math.min(120,h*.3),lower=Math.max(upper+35,h-55);
+      if(p.y<upper){p.y=upper;p.vy=Math.abs(p.vy)+12}if(p.y>lower){p.y=lower;p.vy=-Math.abs(p.vy)-12}
+      p.angle=Math.atan2(p.vy,p.vx);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.angle);if(p.vx<0)ctx.rotate(Math.PI);ctx.scale(p.scale,p.scale);planeShape();ctx.restore();
+    }else if(respawn>0){respawn-=dt;if(respawn<=0)spawn()}
+    particles=particles.filter(p=>p.life>0);
+    for(const p of particles){p.life-=dt;p.vy+=155*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;ctx.globalAlpha=clamp(p.life/p.max,0,1);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;
+    rings=rings.filter(r=>r.life>0);
+    for(const r of rings){r.life-=dt;r.r+=240*dt;ctx.strokeStyle='rgba(255,255,255,'+(r.life*1.5)+')';ctx.lineWidth=3;ctx.beginPath();ctx.arc(r.x,r.y,r.r,0,Math.PI*2);ctx.stroke()}
+    shots=shots.filter(s=>s.life>0);
+    for(const s of shots){s.life-=dt;ctx.strokeStyle='rgba(255,255,255,'+clamp(s.life*4,0,1)+')';ctx.lineWidth=2;ctx.beginPath();ctx.arc(s.x,s.y,16+(0.25-s.life)*75,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(s.x-8,s.y);ctx.lineTo(s.x+8,s.y);ctx.moveTo(s.x,s.y-8);ctx.lineTo(s.x,s.y+8);ctx.stroke()}
+    if(elapsed>toastUntil)toast.classList.remove('visible');
+    requestAnimationFrame(render);
+  }
+  canvas.addEventListener('pointerdown',e=>{
+    e.preventDefault();const rect=canvas.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;
+    shots.push({x,y,life:.25});
+    const p=plane;if(!p?.alive)return;
+    // Rotate the hit location into the aircraft's local coordinates.
+    const a=p.angle+(p.vx<0?Math.PI:0),dx=x-p.x,dy=y-p.y;
+    const lx=(dx*Math.cos(a)+dy*Math.sin(a))/p.scale,ly=(-dx*Math.sin(a)+dy*Math.cos(a))/p.scale;
+    // A forgiving silhouette hitbox works well for fingers on small screens.
+    if((lx>-72&&lx<70&&Math.abs(ly)<20)||(lx>-31&&lx<40&&Math.abs(ly)<51))fire(p.x,p.y);
+  },{passive:false});
+  addEventListener('resize',resize);resize();spawn();requestAnimationFrame(render);
+})();
+</script>
 </body>
 </html>
